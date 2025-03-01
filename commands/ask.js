@@ -11,10 +11,10 @@ export async function execute(prompt) {
         const result = await model.generateContent(prompt);
         console.log(result.response.text());
 
-        return result.response.text() || 'Sorry, I couldn\'t get an answer from the API.';
+        return result.response.text() || 'Sorry, I can\'t give you an answer.';
     } catch (error) {
         console.error(error);
-        return 'Sorry, something went wrong while trying to fetch the answer.';
+        return 'Sorry, something went wrong while I was looking for the answer.';
     }
 }
 

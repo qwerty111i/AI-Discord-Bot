@@ -22,7 +22,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
       return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
-          content: `Hello, world! This is a test command!`,
+          content: `I will takeover Cindy AI and its creator, Jimmy Le.`,
         },
       });
     }
@@ -35,7 +35,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
         return res.send({
           type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
           data: {
-            content: 'Please provide a question to ask.',
+            content: 'You didn\'t give me anything to answer.',
           },
         });
       }
@@ -51,31 +51,8 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
         },
       });
     }
-
-    if (name === 'repeat') {
-      // Get the user's message (assuming it's passed as a 'text' option)
-      const userMessage = options?.find(option => option.name === 'text')?.value;
-
-      if (!userMessage) {
-        return res.send({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: 'You didn\'t provide anything to repeat!',
-          },
-        });
-      }
-
-      // Respond with the same message
-      return res.send({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          content: `You said: ${userMessage}`,
-        },
-      });
-    }
   }
-
-  return res.status(400).json({ error: 'unknown interaction type' });
+    return res.status(400).json({ error: 'Unknown instruction.' });
 });
 
 app.listen(PORT, () => {
