@@ -1,22 +1,23 @@
-import { post } from 'axios';
-
+import { GoogleGenerativeAI } from "@google/generative-ai";
 export const name = 'ask';
 export const description = 'Ask anything!';
-export async function execute(interaction) {
-    const userQuestion = interaction.options.getString('question'); // Get the question from the command options
+import dotenv from 'dotenv';
 
+export async function execute(prompt) {
     try {
-        // Make a request to the Google Gemini API (or your desired AI API)
-        require('dotenv').config();
-        const response = await post('https://gemini.googleapis.com/v1/ask', {
-            apiKey: process.env.GEMINI_API_KEY, // Make sure your API key is in your .env file
-            question: userQuestion,
-        });
+        dotenv.config({ path: '../.env' });
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const result = await model.generateContent(prompt);
+        console.log(result.response.text());
 
-        // Send the answer back to the user
-        await interaction.reply(response.data.answer);
+        return result.response.text() || 'Sorry, I couldn\'t get an answer from the API.';
     } catch (error) {
         console.error(error);
-        await interaction.reply('Sorry, something went wrong while trying to fetch the answer.');
+        return 'Sorry, something went wrong while trying to fetch the answer.';
     }
 }
+
+
+
+
