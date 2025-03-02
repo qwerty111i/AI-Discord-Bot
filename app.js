@@ -3,13 +3,14 @@ import { InteractionType, InteractionResponseType } from 'discord-interactions';
 import express from 'express';
 import { verifyKeyMiddleware } from 'discord-interactions';
 import { execute as askExecute } from './commands/ask.js';
-import { getUserMemory } from './memory.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
   const { id, type, data } = req.body;
+
+  console.log('Received interaction:', req.body);
 
   if (type === InteractionType.PING) {
     return res.send({ type: InteractionResponseType.PONG });
@@ -42,7 +43,7 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
       }
 
       // Execute ask.js
-      const answer = await askExecute(id, userQuestion);
+      const answer = await askExecute(req.body.member, userQuestion);
 
       // Send the answer back to the user
       return res.send({

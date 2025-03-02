@@ -5,7 +5,7 @@ import { storeInteraction } from "../memory.js";
 export const name = "ask";
 export const description = "Ask anything!";
 
-export async function execute(id, prompt) {
+export async function execute(userInfo, prompt) {
   try {
     dotenv.config({ path: "../.env" });
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -22,8 +22,6 @@ export async function execute(id, prompt) {
       topK: 40,
       maxOutputTokens: 8192,
       responseMimeType: "text/plain",
-      
-
     };
 
     // Create a chat session
@@ -42,8 +40,8 @@ export async function execute(id, prompt) {
     const answer = result.response?.text() || "I don't want to talk to you right now.";
 
     // Storing interaction (MongoDB)
-    await storeInteraction(id, prompt, answer, { source: "Gemini API" });
-    console.log(`Stored interaction: ${id} -> ${prompt}`);
+    await storeInteraction(userInfo.user.id, userInfo.nick, userInfo.user.username, prompt, answer, { source: "Gemini API" });
+    console.log(`Stored interaction: ${userInfo.global_name} -> ${prompt}`);
 
     return answer;
 
