@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import dotenv from "dotenv";
-import { storeInteraction } from "../memory.js";
+import { storeInteraction, getUserMemory } from "../memory.js";
 
 export const name = "ask";
 export const description = "Ask anything!";
@@ -24,10 +24,34 @@ export async function execute(userInfo, prompt) {
       responseMimeType: "text/plain",
     };
 
+    // Get user memory
+    const userMemory = await getUserMemory(userInfo.user.id);
+    let conversationHistory = [];
+
+    // Formatting user prompts
+    if (userMemory.length > 0) {
+      conversationHistory = userMemory.map(interaction => ([
+        {
+          role: "user",
+          parts: [{ text: interaction.question }]
+        },
+        {
+          role: "model",
+          parts: [{ text: interaction.answer }]
+        }
+      ])).flat();
+    }
+
+    // Add current prompt
+    conversationHistory.push({
+      role: "user",
+      parts: [{ text: prompt }]
+    });
+    
     // Create a chat session
     const chatSession = model.startChat({
       generationConfig,
-      history: [],
+      history: conversationHistory,
       safetySettings: [
         { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
         { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
@@ -41,8 +65,6 @@ export async function execute(userInfo, prompt) {
 
     // Storing interaction (MongoDB)
     await storeInteraction(userInfo.user.id, userInfo.nick, userInfo.user.username, prompt, answer, { source: "Gemini API" });
-    console.log(`Stored interaction: ${userInfo.global_name} -> ${prompt}`);
-
     return answer;
 
   } catch (error) {

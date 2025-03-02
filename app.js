@@ -10,8 +10,6 @@ const PORT = process.env.PORT || 3000;
 app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
   const { id, type, data } = req.body;
 
-  console.log('Received interaction:', req.body);
-
   if (type === InteractionType.PING) {
     return res.send({ type: InteractionResponseType.PONG });
   }
