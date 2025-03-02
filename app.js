@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { InteractionType, InteractionResponseType } from 'discord-interactions';
 import express from 'express';
 import { verifyKeyMiddleware } from 'discord-interactions';
-import { execute as askExecute } from './commands/ask.js'; // Import the execute function from ask.js
+import { execute as askExecute } from './commands/ask.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
