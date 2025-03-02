@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import dotenv from "dotenv";
 
 export const name = "ask";
@@ -34,9 +34,6 @@ export async function execute(prompt) {
 
     // Send the prompt
     const result = await chatSession.sendMessage(prompt);
-
-    // Print to console (optional)
-    console.log(result.response?.text());
 
     // Return the text. (Make sure your caller awaits execute(...)!)
     return result.response?.text() || "Sorry, I couldn't get an answer from the API.";
