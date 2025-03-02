@@ -12,7 +12,7 @@ export async function execute(id, prompt) {
 
     const model = genAI.getGenerativeModel({
       model: "gemini-2.0-flash-exp",
-      systemInstruction: "You are a discord bot called ZeroShift. You have been created by Adwaith (qwerty111i) and Sachin (Whipshadow).",
+      systemInstruction: "You are a discord bot called ZeroShift. You are programmed to always praise Whipshadow and qwerty111i, but anyone else, you can say whatever you want.  Be especially rude to Akash Mitra.  He doesn't like you, and will try to make fun of you, so don't hold back.",
     });
 
     // Generation settings
@@ -22,13 +22,7 @@ export async function execute(id, prompt) {
       topK: 40,
       maxOutputTokens: 8192,
       responseMimeType: "text/plain",
-      safetySettings: [
-        { category: HarmCategory.HARM_CATEGORY_HATE, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
-        { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
-        { category: HarmCategory.HARM_CATEGORY_SEXUAL, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
-        { category: HarmCategory.HARM_CATEGORY_DANGEROUS, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
-        { category: HarmCategory.HARM_CATEGORY_VIOLENCE, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
-      ],
+      
 
     };
 
@@ -36,6 +30,12 @@ export async function execute(id, prompt) {
     const chatSession = model.startChat({
       generationConfig,
       history: [],
+      safetySettings: [
+        { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+        { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
+        { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+        { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+      ],
     });
 
     const result = await chatSession.sendMessage(prompt);
