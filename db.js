@@ -1,5 +1,5 @@
-import { MongoClient } from 'mongodb';
-import dotenv from 'dotenv';
+import { MongoClient } from "mongodb";
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -10,7 +10,7 @@ async function connectToMongoDB() {
   if (client && db) return db;
 
   try {
-    client = new MongoClient(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+    client = new MongoClient(process.env.MONGO_URI); 
     await client.connect();
     db = client.db();
     console.log("Connected to MongoDB");
