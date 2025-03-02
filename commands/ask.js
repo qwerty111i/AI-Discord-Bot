@@ -24,6 +24,14 @@ export async function execute(prompt) {
       topK: 40,
       maxOutputTokens: 8192,
       responseMimeType: "text/plain",
+      safetySettings: [
+        { category: HarmCategory.HARM_CATEGORY_HATE, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
+        { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
+        { category: HarmCategory.HARM_CATEGORY_SEXUAL, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
+        { category: HarmCategory.HARM_CATEGORY_DANGEROUS, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
+        { category: HarmCategory.HARM_CATEGORY_VIOLENCE, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
+      ],
+
     };
 
     // Create a chat session
