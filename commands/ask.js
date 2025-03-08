@@ -1,18 +1,32 @@
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import dotenv from "dotenv";
-import { storeInteraction, getUserMemory } from "../database/memory.js";
+import { storeInteraction, getUserMemory, getUserNickname, getStoredInformation } from "../database/memory.js";
 
 export const name = "ask";
 export const description = "Ask anything!";
 
 export async function askExecute(userInfo, prompt) {
   try {
+
+      let textTemplate = "You are a discord bot called ZeroShift.  You cannot respond with more than 2000 characters.  You are currently speaking to $(user), and goes by the following nicknames: [server username]. If the nickname is null, refer to the user by their username.   Here is the information about this user: $(storedInfo). If this is null, that means they are a new user. Anything that is stored superceeds what they tell you.";
+      // Get user info
+      const nickname = await getUserNickname(userInfo.user.id)
+      const storedMemory = await getStoredInformation(userInfo.user.id)
+      const userMemory = await getUserMemory(userInfo.user.id);
+      // Replacing placeholders and storing it in a variable
+      let finalText = textTemplate
+          .replace("$(user)", userInfo.user.username)
+          .replace("$(storedInfo)", storedMemory.join("\n")) // Joining array into a readable string
+          .replace("[server username]", nickname.join(", ")); // Joining list into readable format
+
+    console.log(storedMemory.join("\n"))
+    console.log(username)
     dotenv.config({ path: "../.env" });
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
     const model = genAI.getGenerativeModel({
       model: "gemini-2.0-flash-exp",
-      systemInstruction: "You are a discord bot called ZeroShift.  You cannot respond with more than 2000 characters.  You are currently speaking to $(user).  Here is the information about this user: $(storedInfo).  Anything that is stored superceeds what they tell you.",
+      systemInstruction: textTemplate,
     });
 
     // Generation settings
@@ -24,8 +38,7 @@ export async function askExecute(userInfo, prompt) {
       responseMimeType: "text/plain",
     };
 
-    // Get user memory
-    const userMemory = await getUserMemory(userInfo.user.id);
+
     let conversationHistory = [];
 
     // Formatting user prompts

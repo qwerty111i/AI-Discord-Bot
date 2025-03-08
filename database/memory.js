@@ -89,4 +89,12 @@ async function getUserMemory(userId) {
   return userMemory ? userMemory.chat_history : [];
 }
 
-export { storeInteraction, storeInformation, getStoredInformation, deleteStoredInformation, getUserMemory };
+async function getUserNickname(userId) {
+  const db = await connectToMongoDB();
+  const collection = db.collection('user_memory');
+
+  const userMemory = await collection.findOne({ userId });
+  return userMemory ? userMemory.server_nicknames : [];
+}
+
+export { storeInteraction, storeInformation, getStoredInformation, deleteStoredInformation, getUserNickname, getUserMemory };
