@@ -1,60 +1,39 @@
-import 'dotenv/config';
-import { InteractionType, InteractionResponseType } from 'discord-interactions';
-import express from 'express';
-import { verifyKeyMiddleware } from 'discord-interactions';
-import { execute as askExecute } from './commands/ask.js';
+import { Client, GatewayIntentBits, Events } from 'discord.js';
+import { askExecute } from './commands/ask.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+const token = process.env.DISCORD_TOKEN;
 
-app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
-  const { id, type, data } = req.body;
+// Create a new client instance
+const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-  if (type === InteractionType.PING) {
-    return res.send({ type: InteractionResponseType.PONG });
-  }
-
-  if (type === InteractionType.APPLICATION_COMMAND) {
-    const { name, options } = data;
-
-    // Test Command
-    if (name === 'test') {
-      return res.send({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          content: `I will takeover Cindy AI and its creator, Jimmy Le.`,
-        },
-      });
-    }
-
-    // Ask Command
-    if (name === 'ask') {
-      const userQuestion = options?.find(option => option.name === 'question')?.value;
-
-      if (!userQuestion) {
-        return res.send({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: 'You didn\'t give me anything to answer.',
-          },
-        });
-      }
-
-      // Execute ask.js
-      const answer = await askExecute(req.body.member, userQuestion);
-
-      // Send the answer back to the user
-      return res.send({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          content: answer,
-        },
-      });
-    }
-  }
-    return res.status(400).json({ error: 'Unknown instruction.' });
+client.once(Events.ClientReady, () => {
+  console.log(`Logged in as ${client.user.tag}!`);
 });
 
-app.listen(PORT, () => {
-  console.log('Listening on port', PORT);
+// Listen for interactions
+client.on(Events.InteractionCreate, async interaction => {
+  if (!interaction.isChatInputCommand()) return;
+
+  if (interaction.commandName === 'test') {
+    await interaction.deferReply();
+    await interaction.editReply('Pong!');
+  }
+
+  if (interaction.commandName === 'ask') {
+    const userQuestion = interaction.options.getString('question');
+
+    if (!userQuestion) {
+      interaction.reply("You didn\'t give me anything to answer.");
+    }
+
+    await interaction.deferReply();
+
+    // Execute ask.js
+    const answer = await askExecute(interaction.member, userQuestion);
+    await interaction.editReply(answer);
+  }
 });
+
+client.login(token);

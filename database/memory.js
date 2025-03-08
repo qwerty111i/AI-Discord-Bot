@@ -10,7 +10,8 @@ async function storeInteraction(userId, serverUsername, uniqueUsername, question
     await collection.updateOne(
         { userId },
         { 
-          $addToSet: { usernames: { $each: [serverUsername, uniqueUsername] } },
+          $addToSet: { permenant_username: { $each: [ uniqueUsername ] } },
+          $addToSet: { usernames: { $each: [ serverUsername ] } },
           $push: { interactions: { question, answer } }
         }
       );
@@ -18,8 +19,10 @@ async function storeInteraction(userId, serverUsername, uniqueUsername, question
     // If the user doesn't exist in the database
     await collection.insertOne({
       userId,
-      usernames: [ serverUsername, uniqueUsername ],
-      interactions: [{ question, answer }]
+      permenant_username: [ uniqueUsername ],
+      server_nicknames: [ serverUsername ],
+      chat_history: [{ question, answer }],
+      stored_information: []
     });
   }
 }
