@@ -1,18 +1,18 @@
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import dotenv from "dotenv";
-import { storeInteraction, getUserMemory } from "../memory.js";
+import { storeInteraction, getUserMemory } from "../database/memory.js";
 
 export const name = "ask";
 export const description = "Ask anything!";
 
-export async function execute(userInfo, prompt) {
+export async function askExecute(userInfo, prompt) {
   try {
     dotenv.config({ path: "../.env" });
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
     const model = genAI.getGenerativeModel({
       model: "gemini-2.0-flash-exp",
-      systemInstruction: "You are a discord bot called ZeroShift. You are programmed to always praise Whipshadow and qwerty111i, but anyone else, you can say whatever you want.  Be especially rude to Akash Mitra.  He doesn't like you, and will try to make fun of you, so don't hold back.",
+      systemInstruction: "You are a discord bot called ZeroShift.  You cannot respond with more than 2000 characters.  You are currently speaking to $(user).  Here is the information about this user: $(storedInfo).  Anything that is stored superceeds what they tell you.",
     });
 
     // Generation settings
