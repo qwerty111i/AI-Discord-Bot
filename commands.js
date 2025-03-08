@@ -58,6 +58,29 @@ const commands = [
     .toJSON(),
 
     new SlashCommandBuilder()
+    .setName('storeglobal')
+    .setDescription('Store global information.')      
+    .addStringOption(option =>
+      option.setName('information')
+        .setDescription('Enter information.')
+        .setRequired(true))
+    .toJSON(),
+
+    new SlashCommandBuilder()
+    .setName('viewglobal')
+    .setDescription('Get global stored information about users.')
+    .toJSON(),
+
+    new SlashCommandBuilder()
+    .setName('deleteglobal')
+    .setDescription('Delete global stored information about users.')
+    .addIntegerOption(option =>
+      option.setName('index')
+        .setDescription('Enter memory index.')
+        .setRequired(true))
+    .toJSON(),
+
+    new SlashCommandBuilder()
     .setName('summary')
     .setDescription('Get a summary of anything')
     .addStringOption(option =>

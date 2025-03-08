@@ -1,4 +1,5 @@
-import { storeInformation, getStoredInformation, deleteStoredInformation } from "../database/memory.js";
+import { storeInformation, getStoredInformation, deleteStoredInformation, 
+    storeGlobal, viewGlobal, deleteGlobal } from "../database/memory.js";
 
 async function storeUserInformation(userId, information) {
     let storedCorrectly = false;
@@ -28,4 +29,33 @@ async function deleteUserStoredInformation(userId, index) {
     }
 }
 
-export { storeUserInformation, viewUserStoredInformation, deleteUserStoredInformation };
+async function storeGlobalInformation(information) {
+    let storedCorrectly = false;
+    try {
+        await storeGlobal(information);
+        storedCorrectly = true;
+    } catch(e) {
+        storedCorrectly = false
+    }
+    return storedCorrectly;
+}
+
+async function viewGlobalInformation() {
+    const userStoredInformation = await viewGlobal();
+    if (!userStoredInformation) {
+        return "No information has been stored.";
+    }
+    return userStoredInformation;
+}
+
+async function deleteGlobalInformation(index) {
+    const successfulOperation = await deleteGlobal(index);
+    if (successfulOperation !== "Deletion operation failed!") {
+        return "The following memory was deleted: " + successfulOperation;
+    } else {
+        return successfulOperation;
+    }
+}
+
+export { storeUserInformation, viewUserStoredInformation, deleteUserStoredInformation, 
+    storeGlobalInformation, viewGlobalInformation, deleteGlobalInformation };

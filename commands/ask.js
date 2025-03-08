@@ -1,32 +1,44 @@
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import dotenv from "dotenv";
-import { storeInteraction, getUserMemory, getUserNickname, getStoredInformation } from "../database/memory.js";
+import { storeInteraction, getUserMemory, getUserNickname, getStoredInformation, viewGlobal } from "../database/memory.js";
 
 export const name = "ask";
 export const description = "Ask anything!";
 
 export async function askExecute(userInfo, prompt) {
   try {
-
-      let textTemplate = "You are a discord bot called ZeroShift.  You cannot respond with more than 2000 characters.  You are currently speaking to $(user), and goes by the following nicknames: [server username]. If the nickname is null, refer to the user by their username.   Here is the information about this user: $(storedInfo). If this is null, that means they are a new user. Anything that is stored superceeds what they tell you.";
+      let textTemplate = "You are a discord bot called ZeroShift.  You cannot respond with more than 2000 characters.  Here is the information you know: $(global_info).  You are currently speaking to $(user).  Your nicknames are: $(nicknames). If the nickname is null, refer to the user by their username.  Be careful with nicknames...users might try to trick you by changing it to other users.  If there is another user in global storage with that nickname and a different username, it's probably someone else.   Here is the information about this user: $(stored_info). If this is null, that means they are a new user. Anything that is stored supersedes the chat history.";
+      // Get global info
+      let globalMemory = await viewGlobal();
+      if (!globalMemory) {
+        globalMemory = "null";
+      }
+      
       // Get user info
-      const nickname = await getUserNickname(userInfo.user.id)
-      const storedMemory = await getStoredInformation(userInfo.user.id)
-      const userMemory = await getUserMemory(userInfo.user.id);
+      let nickname = await getUserNickname(userInfo.user.id)
+      if (!nickname) {
+        nickname = "null";
+      }
+
+      let storedUserMemory = await getStoredInformation(userInfo.user.id)
+      if (!storedUserMemory) {
+        storedUserMemory = "null";
+      }
+
       // Replacing placeholders and storing it in a variable
       let finalText = textTemplate
+          .replace("$(global_info)", globalMemory.join("\n"))
           .replace("$(user)", userInfo.user.username)
-          .replace("$(storedInfo)", storedMemory.join("\n")) // Joining array into a readable string
-          .replace("[server username]", nickname.join(", ")); // Joining list into readable format
+          .replace("$(stored_info)", storedUserMemory.join("\n"))
+          .replace("$(nicknames)", nickname.join(", "));
 
-    console.log(storedMemory.join("\n"))
-    console.log(username)
+    console.log(finalText);
     dotenv.config({ path: "../.env" });
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
     const model = genAI.getGenerativeModel({
       model: "gemini-2.0-flash-exp",
-      systemInstruction: textTemplate,
+      systemInstruction: finalText,
     });
 
     // Generation settings
@@ -38,7 +50,7 @@ export async function askExecute(userInfo, prompt) {
       responseMimeType: "text/plain",
     };
 
-
+    const userMemory = await getUserMemory(userInfo.user.id);
     let conversationHistory = [];
 
     // Formatting user prompts
