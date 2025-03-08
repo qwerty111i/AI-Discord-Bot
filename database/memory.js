@@ -59,6 +59,78 @@ async function getStoredInformation(userId) {
   return userMemory ? userMemory.stored_information : [];
 }
 
+async function deleteStoredInformation(userId, index) {
+  const db = await connectToMongoDB();
+  const collection = db.collection('user_memory');
+
+  const userMemory = await collection.findOne({ userId });
+
+  if (userMemory && userMemory.stored_information.length > index) {
+    const itemToDelete = userMemory.stored_information[index];
+
+    // Perform the update to remove the element by matching its value
+    await collection.updateOne(
+      { userId },
+      {
+        $pull: { stored_information: { $eq: itemToDelete } }
+      }
+    );
+    return itemToDelete;
+  } else {
+    return "Deletion operation failed!";
+  }
+}
+
+async function storeGlobal(information) {
+  const db = await connectToMongoDB();
+  const collection = db.collection('global_memory');
+
+  const globalMemory = await collection.findOne({});
+
+  if (globalMemory) {
+    await collection.updateOne(
+      {},
+      { 
+        $push: { stored_information: information }
+      }
+    );
+  } else {
+    await collection.insertOne({
+      stored_information: [information],
+    });
+  }
+}
+
+async function viewGlobal() {
+  const db = await connectToMongoDB();
+  const collection = db.collection('global_memory');
+
+  const globalMemory = await collection.findOne({});
+  return globalMemory ? globalMemory.stored_information : [];
+}
+
+async function deleteGlobal(index) {
+  const db = await connectToMongoDB();
+  const collection = db.collection('global_memory');
+
+  const globalMemory = await collection.findOne({});
+
+  if (globalMemory && globalMemory.stored_information.length > index) {
+    const itemToDelete = globalMemory.stored_information[index];
+
+    // Perform the update to remove the element by matching its value
+    await collection.updateOne(
+      {},
+      {
+        $pull: { stored_information: { $eq: itemToDelete } }
+      }
+    );
+    return itemToDelete;
+  } else {
+    return "Deletion operation failed!";
+  }
+}
+
 async function getUserMemory(userId) {
   const db = await connectToMongoDB();
   const collection = db.collection('user_memory');
@@ -75,5 +147,5 @@ async function getUserNickname(userId) {
   return userMemory ? userMemory.server_nicknames : [];
 }
 
-
-export { storeInteraction, getUserMemory, storeInformation, getStoredInformation, getUserNickname, getPermenantUsername };
+export { storeInteraction, storeInformation, getStoredInformation, 
+  deleteStoredInformation, storeGlobal, viewGlobal, deleteGlobal, getUserNickname, getUserMemory };
