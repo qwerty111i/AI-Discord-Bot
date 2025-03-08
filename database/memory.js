@@ -32,7 +32,7 @@ async function getUserMemory(userId) {
   const collection = db.collection('user_memory');
 
   const userMemory = await collection.findOne({ userId });
-  return userMemory ? userMemory.interactions : [];
+  return userMemory ? userMemory.chat_history : [];
 }
 
 export { storeInteraction, getUserMemory };
