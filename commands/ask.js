@@ -1,6 +1,6 @@
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import dotenv from "dotenv";
-import { storeInteraction, getUserMemory, getUserNickname, getStoredInformation, viewGlobal } from "../database/memory.js";
+import { storeInteraction, getUserMemory, getUserNickname, viewUser, viewGlobal } from "../database/memory.js";
 
 export const name = "ask";
 export const description = "Ask anything!";
@@ -20,19 +20,18 @@ export async function askExecute(userInfo, prompt) {
         nickname = "null";
       }
 
-      let storedUserMemory = await getStoredInformation(userInfo.user.id)
-      if (!storedUserMemory) {
-        storedUserMemory = "null";
+      let storedUserMemory = await viewUser(userInfo.user.id)
+      if (typeof storedUserMemory !== 'string') {
+        storedUserMemory = storedUserMemory.join("\n");
       }
 
       // Replacing placeholders and storing it in a variable
       let finalText = textTemplate
           .replace("$(global_info)", globalMemory.join("\n"))
           .replace("$(user)", userInfo.user.username)
-          .replace("$(stored_info)", storedUserMemory.join("\n"))
+          .replace("$(stored_info)", storedUserMemory)
           .replace("$(nicknames)", nickname.join(", "));
 
-    console.log(finalText);
     dotenv.config({ path: "../.env" });
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 

@@ -27,7 +27,7 @@ const commands = [
     .setDescription('Store information about users.')
     .addStringOption(option =>
       option.setName('user')
-        .setDescription('Enter user ID.')
+        .setDescription('Enter a user ID.')
         .setRequired(true))
     .addStringOption(option =>
       option.setName('information')
@@ -40,7 +40,7 @@ const commands = [
     .setDescription('Get stored information about users.')
     .addStringOption(option =>
       option.setName('user')
-        .setDescription('Enter user ID.')
+        .setDescription('Enter a user ID.')
         .setRequired(true))
     .toJSON(),
 
@@ -49,7 +49,7 @@ const commands = [
     .setDescription('Delete stored information about users.')
     .addStringOption(option =>
       option.setName('user')
-        .setDescription('Enter user ID.')
+        .setDescription('Enter a user ID.')
         .setRequired(true))
     .addIntegerOption(option =>
       option.setName('index')
@@ -58,34 +58,11 @@ const commands = [
     .toJSON(),
 
     new SlashCommandBuilder()
-    .setName('storeglobal')
-    .setDescription('Store global information.')      
-    .addStringOption(option =>
-      option.setName('information')
-        .setDescription('Enter information.')
-        .setRequired(true))
-    .toJSON(),
-
-    new SlashCommandBuilder()
-    .setName('viewglobal')
-    .setDescription('Get global stored information about users.')
-    .toJSON(),
-
-    new SlashCommandBuilder()
-    .setName('deleteglobal')
-    .setDescription('Delete global stored information about users.')
+    .setName('recap')
+    .setDescription('Missed a ton of messages?  Get a quick recap!')
     .addIntegerOption(option =>
-      option.setName('index')
-        .setDescription('Enter memory index.')
-        .setRequired(true))
-    .toJSON(),
-
-    new SlashCommandBuilder()
-    .setName('summary')
-    .setDescription('Get a summary of anything')
-    .addStringOption(option =>
-      option.setName('summary')
-        .setDescription('Enter the summary.')
+      option.setName('number')
+        .setDescription('Enter the number of past messages to recap.')
         .setRequired(true))
     .toJSON(),
 
