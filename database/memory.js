@@ -11,7 +11,7 @@ async function storeInteraction(userId, serverUsername, uniqueUsername, question
         { userId },
         { 
           $addToSet: { permenant_username: { $each: [ uniqueUsername ] } },
-          $addToSet: { usernames: { $each: [ serverUsername ] } },
+          $addToSet: { server_nicknames: { $each: [ serverUsername ] } },
           $push: { interactions: { question, answer } }
         }
       );
@@ -64,7 +64,16 @@ async function getUserMemory(userId) {
   const collection = db.collection('user_memory');
 
   const userMemory = await collection.findOne({ userId });
-  return userMemory ? userMemory.stored_information : [];
+  return userMemory ? userMemory.chat_history : [];
 }
 
-export { storeInteraction, getUserMemory, storeInformation, getStoredInformation };
+async function getUserNickname(userId) {
+  const db = await connectToMongoDB();
+  const collection = db.collection('user_memory');
+
+  const userMemory = await collection.findOne({ userId });
+  return userMemory ? userMemory.server_nicknames : [];
+}
+
+
+export { storeInteraction, getUserMemory, storeInformation, getStoredInformation, getUserNickname, getPermenantUsername };
