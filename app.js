@@ -30,9 +30,26 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
     await interaction.deferReply();
+    
 
     // Execute ask.js
     const answer = await askExecute(interaction.member, userQuestion);
+    console.log(answer)
+    await interaction.editReply(answer);
+  }
+
+  if (interaction.commandName === 'math') {
+    const userQuestion = interaction.options.getString('problem');
+
+    if (!userQuestion) {
+      interaction.reply({ content: 'You didn\'t give me anything to answer.', flags: MessageFlags.Ephemeral });
+    }
+
+    await interaction.deferReply();
+    
+    // Execute math.js
+    const answer = await askExecute(interaction.member, userQuestion);
+    console.log(answer)
     await interaction.editReply(answer);
   }
 
