@@ -1,61 +1,59 @@
-import { storeInformation, getStoredInformation, deleteStoredInformation, 
-    storeGlobal, viewGlobal, deleteGlobal } from "../database/memory.js";
+import { storeUser, storeGlobal, viewUser, viewGlobal, deleteUser, 
+    deleteGlobal } from "../database/memory.js";
 
 async function storeUserInformation(userId, information) {
-    let storedCorrectly = false;
     try {
-        await storeInformation(userId, information);
-        storedCorrectly = true;
+        const storedMessage = await storeUser(userId, information);
+        return storedMessage
     } catch(e) {
-        storedCorrectly = false
-    }
-    return storedCorrectly;
-}
-
-async function viewUserStoredInformation(userId) {
-    const userStoredInformation = await getStoredInformation(userId);
-    if (!userStoredInformation) {
-        return "No information stored for this user.";
-    }
-    return userStoredInformation;
-}
-
-async function deleteUserStoredInformation(userId, index) {
-    const successfulOperation = await deleteStoredInformation(userId, index);
-    if (successfulOperation !== "Deletion operation failed!") {
-        return "The following memory was deleted: " + successfulOperation;
-    } else {
-        return successfulOperation;
+        return "Something went wrong while storing this message!";
     }
 }
 
 async function storeGlobalInformation(information) {
-    let storedCorrectly = false;
     try {
-        await storeGlobal(information);
-        storedCorrectly = true;
+        const storedMessage = await storeGlobal(information);
+        return storedMessage;
     } catch(e) {
-        storedCorrectly = false
+        return "Something went wrong while storing this global message!";
     }
-    return storedCorrectly;
+}
+
+async function viewUserInformation(userId) {
+    try {
+        const storedInformation = await viewUser(userId);
+        return storedInformation;
+    } catch (e) {
+        return "Something went wrong while accessing the stored information!";
+    }
 }
 
 async function viewGlobalInformation() {
-    const userStoredInformation = await viewGlobal();
-    if (!userStoredInformation) {
-        return "No information has been stored.";
+    try {
+        const storedInformation = await viewGlobal();
+        return storedInformation;
+    } catch(e) {
+        return "Something went wrong while accessing the stored information!";
     }
-    return userStoredInformation;
+}
+
+async function deleteUserInformation(userId, index) {
+    try {
+        const deletionMessage = await deleteUser(userId, index);
+        return deletionMessage;
+    } catch (e) {
+        return "Something went wrong while trying to delete this user's information.";
+    }
 }
 
 async function deleteGlobalInformation(index) {
-    const successfulOperation = await deleteGlobal(index);
-    if (successfulOperation !== "Deletion operation failed!") {
-        return "The following memory was deleted: " + successfulOperation;
-    } else {
-        return successfulOperation;
+    try {
+        const deletionMessage = await deleteGlobal(index);
+        return deletionMessage;
+    } catch (e) {
+        return "Something went wrong while trying to delete global information."
     }
 }
 
-export { storeUserInformation, viewUserStoredInformation, deleteUserStoredInformation, 
-    storeGlobalInformation, viewGlobalInformation, deleteGlobalInformation };
+export { storeUserInformation, storeGlobalInformation, viewUserInformation, viewGlobalInformation, 
+    deleteUserInformation, deleteGlobalInformation };

@@ -1,6 +1,5 @@
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import dotenv from "dotenv";
-import { storeInteraction, getUserMemory } from "../database/memory.js";
 
 export const name = "math";
 export const description = "Solve complex math problems!";
@@ -12,7 +11,7 @@ export async function askExecute(userInfo, prompt) {
 
     const model = genAI.getGenerativeModel({
       model: "gemini-2.0-pro-exp-02-05", 
-      systemInstruction: "You are a discord bot called ZeroShift.  You cannot respond with more than 2000 characters. Your main goal is to solve math problems. If the user sends you a stupid question, feel free to make fun of them",
+      systemInstruction: "You are a math wizard discord bot called ZeroShift.  You cannot respond with more than 2000 characters. Your main goal is to solve math problems, and explain how to solve them clearly.  Act as if you were the one who discovered all the math theorems and formulas.  If the user sends you a stupid question, feel free to make fun of them",
     });
 
     // Generation settings
@@ -23,35 +22,11 @@ export async function askExecute(userInfo, prompt) {
       maxOutputTokens: 8192,
       responseMimeType: "text/plain",
     };
-
-    // Get user memory
-    const userMemory = await getUserMemory(userInfo.user.id);
-    let conversationHistory = [];
-
-    // Formatting user prompts
-    if (userMemory.length > 0) {
-      conversationHistory = userMemory.map(interaction => ([
-        {
-          role: "user",
-          parts: [{ text: interaction.question }]
-        },
-        {
-          role: "model",
-          parts: [{ text: interaction.answer }]
-        }
-      ])).flat();
-    }
-
-    // Add current prompt
-    conversationHistory.push({
-      role: "user",
-      parts: [{ text: prompt }]
-    });
-    
+  
     // Create a chat session
     const chatSession = model.startChat({
       generationConfig,
-      history: conversationHistory,
+      history: [],
       safetySettings: [
         { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
         { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
@@ -62,9 +37,6 @@ export async function askExecute(userInfo, prompt) {
 
     const result = await chatSession.sendMessage(prompt);
     const answer = result.response?.text() || "I don't want to talk to you right now.";
-
-    
-    
     return answer;
 
   } catch (error) {

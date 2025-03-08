@@ -1,7 +1,7 @@
 import { Client, GatewayIntentBits, Events, MessageFlags } from 'discord.js';
 import { askExecute } from './commands/ask.js';
-import { storeUserInformation, viewUserStoredInformation, deleteUserStoredInformation, 
-  storeGlobalInformation, viewGlobalInformation, deleteGlobalInformation } from './commands/store.js';
+import { storeUserInformation, storeGlobalInformation, viewUserInformation, viewGlobalInformation, 
+  deleteUserInformation, deleteGlobalInformation } from './commands/store.js';
 import dotenv from 'dotenv';
 import './commands.js';
 import { deleteGlobal } from './database/memory.js';
@@ -34,8 +34,6 @@ client.on(Events.InteractionCreate, async interaction => {
 
     await interaction.deferReply();
     
-
-    // Execute ask.js
     const answer = await askExecute(interaction.member, userQuestion);
     console.log(answer)
     await interaction.editReply(answer);
@@ -51,7 +49,6 @@ client.on(Events.InteractionCreate, async interaction => {
 
     await interaction.deferReply();
     
-    // Execute math.js
     const answer = await askExecute(interaction.member, userQuestion);
     console.log(answer)
     await interaction.editReply(answer);
@@ -60,25 +57,25 @@ client.on(Events.InteractionCreate, async interaction => {
   // store Command
   if (interaction.commandName === 'store') {
     const userId = interaction.options.getString('user');
-    const userInformation = interaction.options.getString('information');
+    const information = interaction.options.getString('information');
 
-    if (!userId || !userInformation) {
+    if (!userId || !information) {
       interaction.reply({ content: 'Invalid inputs!', flags: MessageFlags.Ephemeral });
     }
 
-    if (interaction.member.user.id !== "496802108540977162" && interaction.member.user.id !== "434110212933419009") {
+    if (interaction.member.user.id !== '496802108540977162' && interaction.member.user.id !== '434110212933419009') {
       interaction.reply({ content: 'You are not authorized to use this command.', flags: MessageFlags.Ephemeral });
     }
 
     await interaction.deferReply();
 
-    // Execute store.js
-    const storedCorrectly = await storeUserInformation(userId, userInformation);
-    if (storedCorrectly == true) {
-      await interaction.editReply("Information has been stored!")
+    let storedMessage;
+    if (userId !== 'global') {
+      storedMessage = await storeUserInformation(userId, information);
     } else {
-      await interaction.editReply("Something went wrong...");
+      storedMessage = await storeGlobalInformation(information);
     }
+    await interaction.editReply(storedMessage);
   }
 
   // viewstored Command
@@ -89,94 +86,52 @@ client.on(Events.InteractionCreate, async interaction => {
       interaction.reply({ content: 'Invalid inputs!', flags: MessageFlags.Ephemeral });
     }
 
-    if (interaction.member.user.id !== "496802108540977162" && interaction.member.user.id !== "434110212933419009") {
+    if (interaction.member.user.id !== '496802108540977162' && interaction.member.user.id !== '434110212933419009') {
       interaction.reply({ content: 'You are not authorized to use this command.', flags: MessageFlags.Ephemeral });
     }
 
     await interaction.deferReply();
 
-    // Execute store.js
-    const storedInformation = await viewUserStoredInformation(userId);
-    let printStoredInformation = "";
-    for (let i = 0; i < storedInformation.length; i++) {
-      printStoredInformation += (i + 1) + ". " + storedInformation[i] + "\n";
+    let storedInformation;
+    if (userId !== 'global') {
+      storedInformation = await viewUserInformation(userId);
+    } else {
+      storedInformation = await viewGlobalInformation();
     }
-    await interaction.editReply(printStoredInformation.toString());
+
+    if (storedInformation === 'Something went wrong while accessing the stored information!') {
+      interaction.editReply(storedInformation);
+    } else {
+      let printStoredInformation = "**" + storedInformation[0] + "**" + "\n";
+      for (let i = 1; i < storedInformation.length; i++) {
+        printStoredInformation += i + ". " + storedInformation[i] + "\n";
+      }
+      await interaction.editReply(printStoredInformation.toString());
+    }
   }
 
   // deletestored Command
   if (interaction.commandName === 'deletestored') {
     const userId = interaction.options.getString('user');
-    const index = interaction.options.getInteger('index');
+    const index = interaction.options.getInteger('index') - 1;
 
     if (!userId) {
       interaction.reply({ content: 'Invalid inputs!', flags: MessageFlags.Ephemeral });
     }
 
-    if (interaction.member.user.id !== "496802108540977162" && interaction.member.user.id !== "434110212933419009") {
+    if (interaction.member.user.id !== '496802108540977162' && interaction.member.user.id !== '434110212933419009') {
       interaction.reply({ content: 'You are not authorized to use this command.', flags: MessageFlags.Ephemeral });
     }
 
     await interaction.deferReply();
 
-    // Execute store.js
-    const deletionMessage = await deleteUserStoredInformation(userId, index);
-    await interaction.editReply(deletionMessage.toString());
-  }
-
-  // storeglobal Command
-  if (interaction.commandName === 'storeglobal') {
-    const userInformation = interaction.options.getString('information');
-
-    if (!userInformation) {
-      interaction.reply({ content: 'Invalid inputs!', flags: MessageFlags.Ephemeral });
-    }
-
-    if (interaction.member.user.id !== "496802108540977162" && interaction.member.user.id !== "434110212933419009") {
-      interaction.reply({ content: 'You are not authorized to use this command.', flags: MessageFlags.Ephemeral });
-    }
-
-    await interaction.deferReply();
-
-    // Execute store.js
-    const storedCorrectly = await storeGlobalInformation(userInformation);
-    if (storedCorrectly == true) {
-      await interaction.editReply("Information has been stored!")
+    let deletionMessage;
+    if (userId !== 'global') {
+      deletionMessage = await deleteUserInformation(userId, index);
     } else {
-      await interaction.editReply("Something went wrong...");
+      deletionMessage = await deleteGlobalInformation(index);
     }
-  }
-
-  // viewglobal Command
-  if (interaction.commandName === 'viewglobal') {
-    if (interaction.member.user.id !== "496802108540977162" && interaction.member.user.id !== "434110212933419009") {
-      interaction.reply({ content: 'You are not authorized to use this command.', flags: MessageFlags.Ephemeral });
-    }
-
-    await interaction.deferReply();
-
-    // Execute store.js
-    const storedInformation = await viewGlobalInformation();
-    let printStoredInformation = "";
-    for (let i = 0; i < storedInformation.length; i++) {
-      printStoredInformation += (i + 1) + ". " + storedInformation[i] + "\n";
-    }
-    await interaction.editReply(printStoredInformation.toString());
-  }
-
-  // deleteglobal Command
-  if (interaction.commandName === 'deleteglobal') {
-    const index = interaction.options.getInteger('index');
-
-    if (interaction.member.user.id !== "496802108540977162" && interaction.member.user.id !== "434110212933419009") {
-      interaction.reply({ content: 'You are not authorized to use this command.', flags: MessageFlags.Ephemeral });
-    }
-
-    await interaction.deferReply();
-
-    // Execute store.js
-    const deletionMessage = await deleteGlobalInformation(index);
-    await interaction.editReply(deletionMessage.toString());
+    await interaction.editReply(deletionMessage);
   }
 });
 

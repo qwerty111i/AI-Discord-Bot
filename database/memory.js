@@ -1,11 +1,11 @@
 import { connectToMongoDB } from './db.js';
 
+// Storing user chat history
 async function storeInteraction(userId, serverUsername, uniqueUsername, question, answer) {
   const db = await connectToMongoDB();
   const collection = db.collection('user_memory');
 
   const userMemory = await collection.findOne({ userId });
-
   if (userMemory) {
     await collection.updateOne(
         { userId },
@@ -16,7 +16,6 @@ async function storeInteraction(userId, serverUsername, uniqueUsername, question
         }
       );
   } else {
-    // If the user doesn't exist in the database
     await collection.insertOne({
       userId,
       permenant_username: [ uniqueUsername ],
@@ -27,12 +26,12 @@ async function storeInteraction(userId, serverUsername, uniqueUsername, question
   }
 }
 
-async function storeInformation(userId, information) {
+// Storing user information
+async function storeUser(userId, information) {
   const db = await connectToMongoDB();
   const collection = db.collection('user_memory');
 
   const userMemory = await collection.findOne({ userId });
-
   if (userMemory) {
     await collection.updateOne(
       { userId },
@@ -49,38 +48,11 @@ async function storeInformation(userId, information) {
       stored_information: [information]
     });
   }
+  const user = "**User: **" + await getPermenantUsername(userId) + "\n";
+  return "Operation Successful!\n\n" + user + "**Stored: **" + information;
 }
 
-async function getStoredInformation(userId) {
-  const db = await connectToMongoDB();
-  const collection = db.collection('user_memory');
-
-  const userMemory = await collection.findOne({ userId });
-  return userMemory ? userMemory.stored_information : [];
-}
-
-async function deleteStoredInformation(userId, index) {
-  const db = await connectToMongoDB();
-  const collection = db.collection('user_memory');
-
-  const userMemory = await collection.findOne({ userId });
-
-  if (userMemory && userMemory.stored_information.length > index) {
-    const itemToDelete = userMemory.stored_information[index];
-
-    // Perform the update to remove the element by matching its value
-    await collection.updateOne(
-      { userId },
-      {
-        $pull: { stored_information: { $eq: itemToDelete } }
-      }
-    );
-    return itemToDelete;
-  } else {
-    return "Deletion operation failed!";
-  }
-}
-
+// Storing global information
 async function storeGlobal(information) {
   const db = await connectToMongoDB();
   const collection = db.collection('global_memory');
@@ -99,38 +71,92 @@ async function storeGlobal(information) {
       stored_information: [information],
     });
   }
+  return "Operation Successful!\n\n**Stored: **" + information;
 }
 
+// Accessing user stored information
+async function viewUser(userId) {
+  const db = await connectToMongoDB();
+  const collection = db.collection('user_memory');
+
+  const userMemory = await collection.findOne({ userId });
+  let storedInformation;
+  if (userMemory) {
+    const user = await getPermenantUsername(userId);
+    storedInformation = userMemory.stored_information;
+    storedInformation.unshift("**User: " + user + "**");
+  }
+  return userMemory ? storedInformation : "No information stored for this user!";
+}
+
+// Accessing global stored information
 async function viewGlobal() {
   const db = await connectToMongoDB();
   const collection = db.collection('global_memory');
 
   const globalMemory = await collection.findOne({});
-  return globalMemory ? globalMemory.stored_information : [];
+  let storedInformation;
+  if (globalMemory) {
+    storedInformation = globalMemory.stored_information;
+    storedInformation.unshift("**Stored Global Information: **");
+  }
+  return globalMemory ? storedInformation : "No global information stored!";
 }
 
+// Deleting user stored information
+async function deleteUser(userId, index) {
+  const db = await connectToMongoDB();
+  const collection = db.collection('user_memory');
+
+  const userMemory = await collection.findOne({ userId });
+  if (userMemory && userMemory.stored_information.length > index && index >= 0) {
+    const itemToDelete = userMemory.stored_information[index];
+    const user = await getPermenantUsername(userId);
+
+    await collection.updateOne(
+      { userId },
+      {
+        $pull: { stored_information: { $eq: itemToDelete } }
+      }
+    );
+    return "Operation Successful!\n\n**User: **" + user + "\n**Information Deleted: **" + itemToDelete;
+  } else {
+    if (!userMemory) {
+      return "This user's memory doesn't exist!";
+    } else {
+      return "Invalid index!  Deletion operation failed.";
+    }
+  }
+}
+
+// Deleting global stored information
 async function deleteGlobal(index) {
   const db = await connectToMongoDB();
   const collection = db.collection('global_memory');
 
   const globalMemory = await collection.findOne({});
-
-  if (globalMemory && globalMemory.stored_information.length > index) {
+  if (globalMemory && globalMemory.stored_information.length > index && index >= 0) {
     const itemToDelete = globalMemory.stored_information[index];
 
-    // Perform the update to remove the element by matching its value
     await collection.updateOne(
       {},
       {
         $pull: { stored_information: { $eq: itemToDelete } }
       }
     );
-    return itemToDelete;
+    return "Operation Successful!\n\n**Information Deleted: **" + itemToDelete;
   } else {
-    return "Deletion operation failed!";
+    if (!globalMemory) {
+      return "Global memory doesn't exist!";
+    } else {
+      return "Invalid index!  Deletion operation failed.";
+    }
   }
 }
 
+/** Getters */
+
+// Getting chat history
 async function getUserMemory(userId) {
   const db = await connectToMongoDB();
   const collection = db.collection('user_memory');
@@ -139,6 +165,7 @@ async function getUserMemory(userId) {
   return userMemory ? userMemory.chat_history : [];
 }
 
+// Getting user nickname list
 async function getUserNickname(userId) {
   const db = await connectToMongoDB();
   const collection = db.collection('user_memory');
@@ -147,5 +174,14 @@ async function getUserNickname(userId) {
   return userMemory ? userMemory.server_nicknames : [];
 }
 
-export { storeInteraction, storeInformation, getStoredInformation, 
-  deleteStoredInformation, storeGlobal, viewGlobal, deleteGlobal, getUserNickname, getUserMemory };
+// Getting user's permenant username
+async function getPermenantUsername(userId) {
+  const db = await connectToMongoDB();
+  const collection = db.collection('user_memory');
+
+  const userMemory = await collection.findOne({ userId });
+  return userMemory ? userMemory.permanent_username : [];
+}
+
+export { storeInteraction, storeUser, storeGlobal, viewUser, viewGlobal, 
+  deleteUser, deleteGlobal, getUserNickname, getUserMemory };
