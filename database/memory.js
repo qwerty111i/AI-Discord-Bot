@@ -27,12 +27,44 @@ async function storeInteraction(userId, serverUsername, uniqueUsername, question
   }
 }
 
+async function storeInformation(userId, information) {
+  const db = await connectToMongoDB();
+  const collection = db.collection('user_memory');
+
+  const userMemory = await collection.findOne({ userId });
+
+  if (userMemory) {
+    await collection.updateOne(
+      { userId },
+      { 
+        $push: { stored_information: information }
+      }
+    );
+  } else {
+    await collection.insertOne({
+      userId,
+      permanent_username: [],
+      server_nicknames: [],
+      chat_history: [],
+      stored_information: [information]
+    });
+  }
+}
+
+async function getStoredInformation(userId) {
+  const db = await connectToMongoDB();
+  const collection = db.collection('user_memory');
+
+  const userMemory = await collection.findOne({ userId });
+  return userMemory ? userMemory.stored_information : [];
+}
+
 async function getUserMemory(userId) {
   const db = await connectToMongoDB();
   const collection = db.collection('user_memory');
 
   const userMemory = await collection.findOne({ userId });
-  return userMemory ? userMemory.interactions : [];
+  return userMemory ? userMemory.stored_information : [];
 }
 
-export { storeInteraction, getUserMemory };
+export { storeInteraction, getUserMemory, storeInformation, getStoredInformation };

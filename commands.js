@@ -36,6 +36,28 @@ const commands = [
     .toJSON(),
 
     new SlashCommandBuilder()
+    .setName('viewstored')
+    .setDescription('Get stored information about users.')
+    .addStringOption(option =>
+      option.setName('user')
+        .setDescription('Enter user ID.')
+        .setRequired(true))
+    .toJSON(),
+
+    new SlashCommandBuilder()
+    .setName('deletestored')
+    .setDescription('Delete stored information about users.')
+    .addStringOption(option =>
+      option.setName('user')
+        .setDescription('Enter user ID.')
+        .setRequired(true))
+    .addStringOption(option =>
+      option.setName('information')
+        .setDescription('Enter information.')
+        .setRequired(true))
+    .toJSON(),
+
+    new SlashCommandBuilder()
     .setName('summary')
     .setDescription('Get a summary of anything')
     .addStringOption(option =>
