@@ -51,9 +51,9 @@ const commands = [
       option.setName('user')
         .setDescription('Enter user ID.')
         .setRequired(true))
-    .addStringOption(option =>
-      option.setName('information')
-        .setDescription('Enter information.')
+    .addIntegerOption(option =>
+      option.setName('index')
+        .setDescription('Enter memory index.')
         .setRequired(true))
     .toJSON(),
 

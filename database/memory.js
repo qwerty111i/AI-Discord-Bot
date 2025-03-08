@@ -11,7 +11,7 @@ async function storeInteraction(userId, serverUsername, uniqueUsername, question
         { userId },
         { 
           $addToSet: { permenant_username: { $each: [ uniqueUsername ] } },
-          $addToSet: { usernames: { $each: [ serverUsername ] } },
+          $addToSet: { server_nicknames: { $each: [ serverUsername ] } },
           $push: { interactions: { question, answer } }
         }
       );
@@ -59,12 +59,34 @@ async function getStoredInformation(userId) {
   return userMemory ? userMemory.stored_information : [];
 }
 
+async function deleteStoredInformation(userId, index) {
+  const db = await connectToMongoDB();
+  const collection = db.collection('user_memory');
+
+  const userMemory = await collection.findOne({ userId });
+
+  if (userMemory && userMemory.stored_information.length > index) {
+    const itemToDelete = userMemory.stored_information[index];
+
+    // Perform the update to remove the element by matching its value
+    await collection.updateOne(
+      { userId },
+      {
+        $pull: { stored_information: { $eq: itemToDelete } }
+      }
+    );
+    return itemToDelete;
+  } else {
+    return "Deletion operation failed!";
+  }
+}
+
 async function getUserMemory(userId) {
   const db = await connectToMongoDB();
   const collection = db.collection('user_memory');
 
   const userMemory = await collection.findOne({ userId });
-  return userMemory ? userMemory.stored_information : [];
+  return userMemory ? userMemory.chat_history : [];
 }
 
-export { storeInteraction, getUserMemory, storeInformation, getStoredInformation };
+export { storeInteraction, storeInformation, getStoredInformation, deleteStoredInformation, getUserMemory };

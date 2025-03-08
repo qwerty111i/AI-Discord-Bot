@@ -1,6 +1,6 @@
-import { storeInformation, getStoredInformation } from "../database/memory.js";
+import { storeInformation, getStoredInformation, deleteStoredInformation } from "../database/memory.js";
 
-export async function storeUserInformation(userId, information) {
+async function storeUserInformation(userId, information) {
     let storedCorrectly = false;
     try {
         await storeInformation(userId, information);
@@ -11,10 +11,21 @@ export async function storeUserInformation(userId, information) {
     return storedCorrectly;
 }
 
-export async function viewUserStoredInformation(userId) {
+async function viewUserStoredInformation(userId) {
     const userStoredInformation = await getStoredInformation(userId);
     if (!userStoredInformation) {
         return "No information stored for this user.";
     }
     return userStoredInformation;
 }
+
+async function deleteUserStoredInformation(userId, index) {
+    const successfulOperation = await deleteStoredInformation(userId, index);
+    if (successfulOperation !== "Deletion operation failed!") {
+        return "The following memory was deleted: " + successfulOperation;
+    } else {
+        return successfulOperation;
+    }
+}
+
+export { storeUserInformation, viewUserStoredInformation, deleteUserStoredInformation };
