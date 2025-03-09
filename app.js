@@ -149,7 +149,7 @@ client.on(Events.InteractionCreate, async interaction => {
     } else {
       const messages = await interaction.channel.messages.fetch({ limit: numMessages });
       await interaction.deferReply();
-      const recap = await getRecap(messages);
+      const recap = await getRecap(messages, interaction.guild.id);
       await interaction.editReply(recap);
     }
   }

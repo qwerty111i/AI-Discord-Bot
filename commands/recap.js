@@ -2,7 +2,7 @@ import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/ge
 import { viewGlobal } from '../database/memory.js';
 import dotenv from "dotenv";
 
-export async function getRecap(messages) {
+export async function getRecap(messages, guildId) {
   try {
     let recapMessages = [];
     messages.reverse().forEach((msg) => {
@@ -13,14 +13,14 @@ export async function getRecap(messages) {
     let textTemplate = "You are a discord bot called ZeroShift.  You cannot respond with more than 2000 characters.  Here is the information you know: $(global_info).  Your primary goal is to summarize the messages that are inputted.  The global information is for contextualization so you can provide a more robust summary.  Your messages might also come up into the chat history, keep this in mind while summarizing.  Make the summarization as interesting as possible, and don't worry about making it short.";
     
     // Get global info
-    let globalMemory = await viewGlobal();
-    if (!globalMemory) {
-      globalMemory = "null";
-    }
+    let globalMemory = await viewGlobal(guildId);
+      if (typeof globalMemory !== 'string') {
+        globalMemory = globalMemory.join("\n");
+      }
     
     // Replacing placeholders and storing it in a variable
     let finalText = textTemplate
-      .replace("$(global_info)", globalMemory.join("\n"));
+      .replace("$(global_info)", globalMemory);
     
     console.log("DSIFDSLFJSFJDFL");
     console.log(finalText);
