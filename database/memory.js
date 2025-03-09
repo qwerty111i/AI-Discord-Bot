@@ -90,7 +90,7 @@ async function viewUser(userId) {
 }
 
 // Accessing global stored information
-async function viewGlobal() {
+async function viewGlobal(guild) {
   const db = await connectToMongoDB();
   const collection = db.collection('global_memory');
 
@@ -100,7 +100,12 @@ async function viewGlobal() {
     storedInformation = globalMemory.stored_information;
     storedInformation.unshift("**Stored Global Information: **");
   }
-  return globalMemory ? storedInformation : "No global information stored!";
+
+  if (guild === '1293953828256878685' || guild === '636026902796173343' || guild === '645400406129639454') {
+    return globalMemory ? storedInformation : "No global information stored!";
+  } else {
+    return "No global information stored!"
+  }
 }
 
 // Deleting user stored information
