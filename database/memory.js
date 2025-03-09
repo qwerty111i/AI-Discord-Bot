@@ -10,9 +10,9 @@ async function storeInteraction(userId, serverUsername, uniqueUsername, question
     await collection.updateOne(
         { userId },
         { 
-          $addToSet: { permenant_username: { $each: [ uniqueUsername ] } },
+          $addToSet: { permenant_username: uniqueUsername },
           $addToSet: { server_nicknames: { $each: [ serverUsername ] } },
-          $push: { interactions: { question, answer } }
+          $push: { chat_history: { question, answer } }
         }
       );
   } else {

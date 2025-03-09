@@ -19,5 +19,5 @@ This bot is currently on v0.1.0-beta.
 Below is the current roadmap of this discord bot.  For additional features you want to see, make an feature request!
 
 - **Emoji Reactions:** If reactions are added to the bot, it will respond to it!
-- **Image Input Functionality** This includes inputting (and potentially outputting) images and other types of data formats!
-- **Expanded Recap Features** These include features such as seeing how many messages you've missed.
+- **Image Input Functionality:** This includes inputting (and potentially outputting) images and other types of data formats!
+- **Expanded Recap Features:** These include features such as seeing how many messages you've missed.
