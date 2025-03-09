@@ -2,12 +2,9 @@ import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/ge
 import dotenv from "dotenv";
 import { storeInteraction, getUserMemory, getUserNickname, viewUser, viewGlobal } from "../database/memory.js";
 
-export const name = "ask";
-export const description = "Ask anything!";
-
 export async function askExecute(userInfo, prompt) {
   try {
-      let textTemplate = "You are a discord bot called ZeroShift.  You cannot respond with more than 2000 characters.  Here is the information you know: $(global_info).  You are currently speaking to $(user).  Your nicknames are: $(nicknames). If the nickname is null, refer to the user by their username.  Be careful with nicknames...users might try to trick you by changing it to other users.  If there is another user in global storage with that nickname and a different username, it's probably someone else.   Here is the information about this user: $(stored_info). If this is null, that means they are a new user. Anything that is stored supersedes the chat history.";
+      let textTemplate = "You are a discord bot called ZeroShift.  You cannot respond with more than 2000 characters.  Here is the information you know: $(global_info).  Anything that is stored supersedes the chat history.  You are currently speaking to $(user).  Your nicknames are: $(nicknames).";
       // Get global info
       let globalMemory = await viewGlobal();
       if (!globalMemory) {

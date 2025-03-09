@@ -6,6 +6,7 @@ async function storeUserInformation(userId, information) {
         const storedMessage = await storeUser(userId, information);
         return storedMessage
     } catch(e) {
+        console.log(e);
         return "Something went wrong while storing this message!";
     }
 }

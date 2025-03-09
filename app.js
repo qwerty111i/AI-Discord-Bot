@@ -1,16 +1,21 @@
 import { Client, GatewayIntentBits, Events, MessageFlags } from 'discord.js';
 import { askExecute } from './commands/ask.js';
+import { getRecap } from './commands/recap.js';
 import { storeUserInformation, storeGlobalInformation, viewUserInformation, viewGlobalInformation, 
   deleteUserInformation, deleteGlobalInformation } from './commands/store.js';
-import dotenv from 'dotenv';
 import './commands.js';
-import { deleteGlobal } from './database/memory.js';
+import dotenv from 'dotenv';
 dotenv.config();
 
 const token = process.env.DISCORD_TOKEN;
 
 // Create a new client instance
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [
+  GatewayIntentBits.Guilds,
+  GatewayIntentBits.MessageContent,
+  GatewayIntentBits.GuildMessageReactions,
+  GatewayIntentBits.GuildExpressions
+] });
 
 client.once(Events.ClientReady, () => {
   console.log(`Logged in as ${client.user.tag}!`);
@@ -99,7 +104,8 @@ client.on(Events.InteractionCreate, async interaction => {
       storedInformation = await viewGlobalInformation();
     }
 
-    if (storedInformation === 'Something went wrong while accessing the stored information!') {
+    if (storedInformation === 'Something went wrong while accessing the stored information!' || 
+      storedInformation === 'No information stored for this user!') {
       interaction.editReply(storedInformation);
     } else {
       let printStoredInformation = "**" + storedInformation[0] + "**" + "\n";
@@ -132,6 +138,19 @@ client.on(Events.InteractionCreate, async interaction => {
       deletionMessage = await deleteGlobalInformation(index);
     }
     await interaction.editReply(deletionMessage);
+  }
+
+  // recap Command
+  if (interaction.commandName === 'recap') {
+    const numMessages = interaction.options.getInteger('number');    
+    if (numMessages < 1) {
+      interaction.reply({ content: "Invalid message count!", flags: MessageFlags.Ephemeral });
+    } else {
+      const messages = await interaction.channel.messages.fetch({ limit: numMessages });
+      await interaction.deferReply();
+      const recap = await getRecap(messages);
+      await interaction.editReply(recap);
+    }
   }
 });
 
