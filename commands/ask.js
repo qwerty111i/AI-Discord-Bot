@@ -85,7 +85,7 @@ export async function askExecute(userInfo, prompt, guildId) {
     const answer = result.response?.text() || "I don't want to talk to you right now.";
 
     // Storing interaction (MongoDB)
-    await storeInteraction(userInfo.user.id, userInfo.nickname, userInfo.user.username, prompt, answer, { source: "Gemini API" });
+    await storeInteraction(userInfo.user.id, userInfo.user.username, userInfo.nickname, prompt, answer);
     return answer;
   } catch (error) {
     console.error(error);

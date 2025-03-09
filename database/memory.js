@@ -1,7 +1,7 @@
 import { connectToMongoDB } from './db.js';
 
 // Storing user chat history
-async function storeInteraction(userId, serverUsername, uniqueUsername, question, answer) {
+async function storeInteraction(userId, permenantUsername, serverNickname, question, answer) {
   const db = await connectToMongoDB();
   const collection = db.collection('user_memory');
 
@@ -10,16 +10,16 @@ async function storeInteraction(userId, serverUsername, uniqueUsername, question
     await collection.updateOne(
         { userId },
         { 
-          $addToSet: { permenant_username: uniqueUsername },
-          $addToSet: { server_nicknames: { $each: [ serverUsername ] } },
+          $addToSet: { permenant_username: permenantUsername },
+          $addToSet: { server_nicknames: serverNickname },
           $push: { chat_history: { question, answer } }
         }
       );
   } else {
     await collection.insertOne({
       userId,
-      permenant_username: [ uniqueUsername ],
-      server_nicknames: [ serverUsername ],
+      permenant_username: [ permenantUsername ],
+      server_nicknames: [ serverNickname ],
       chat_history: [{ question, answer }],
       stored_information: []
     });
