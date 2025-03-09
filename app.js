@@ -144,7 +144,7 @@ client.on(Events.InteractionCreate, async interaction => {
   // recap Command
   if (interaction.commandName === 'recap') {
     const numMessages = interaction.options.getInteger('number');    
-    if (numMessages < 1) {
+    if (numMessages < 1 || numMessages > 99) {
       interaction.reply({ content: "Invalid message count!", flags: MessageFlags.Ephemeral });
     } else {
       const messages = await interaction.channel.messages.fetch({ limit: numMessages });
