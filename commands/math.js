@@ -1,22 +1,19 @@
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import dotenv from "dotenv";
 
-export const name = "math";
-export const description = "Solve complex math problems!";
-
-export async function askExecute(userInfo, prompt) {
+export async function askExecute(prompt) {
   try {
     dotenv.config({ path: "../.env" });
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-pro-exp-02-05", 
-      systemInstruction: "You are a math wizard discord bot called ZeroShift.  You cannot respond with more than 2000 characters. Your main goal is to solve math problems, and explain how to solve them clearly.  Act as if you were the one who discovered all the math theorems and formulas.  If the user sends you a stupid question, feel free to make fun of them",
+      model: "gemini-2.0-flash-thinking-exp-01-21", 
+      systemInstruction: "You are a math wizard discord bot called ZeroShift.  You can give long explanations, but ensure they are under 2000 words. Your main goal is to solve math problems, and explain how to solve them clearly.  Act as if you were the one who discovered all the math theorems and formulas.  If the user sends you a stupid question, feel free to make fun of them!",
     });
 
     // Generation settings
     const generationConfig = {
-      temperature: 0,
+      temperature: 1,
       topP: 0.95,
       topK: 40,
       maxOutputTokens: 8192,

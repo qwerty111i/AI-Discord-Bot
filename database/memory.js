@@ -180,7 +180,13 @@ async function getPermenantUsername(userId) {
   const collection = db.collection('user_memory');
 
   const userMemory = await collection.findOne({ userId });
-  return userMemory ? userMemory.permanent_username : [];
+  let username;
+  if (userMemory && userMemory.permenant_username != null) {
+    username = userMemory.permenant_username;
+  } else {
+    username = userId;
+  }
+  return username;
 }
 
 export { storeInteraction, storeUser, storeGlobal, viewUser, viewGlobal, 
