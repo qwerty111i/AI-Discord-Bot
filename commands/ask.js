@@ -2,13 +2,13 @@ import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/ge
 import dotenv from "dotenv";
 import { storeInteraction, getUserMemory, getUserNickname, viewUser, viewGlobal } from "../database/memory.js";
 
-export async function askExecute(userInfo, prompt) {
+export async function askExecute(userInfo, prompt, guildId) {
   try {
       let textTemplate = "You are a discord bot called ZeroShift.  You cannot respond with more than 2000 characters.  Here is the information you know: $(global_info).  Anything that is stored supersedes the chat history.  You are currently speaking to $(user).  Your nicknames are: $(nicknames).";
       // Get global info
-      let globalMemory = await viewGlobal();
-      if (!globalMemory) {
-        globalMemory = "null";
+      let globalMemory = await viewGlobal(guildId);
+      if (typeof globalMemory !== 'string') {
+        globalMemory = globalMemory.join("\n");
       }
       
       // Get user info
@@ -24,11 +24,11 @@ export async function askExecute(userInfo, prompt) {
 
       // Replacing placeholders and storing it in a variable
       let finalText = textTemplate
-          .replace("$(global_info)", globalMemory.join("\n"))
+          .replace("$(global_info)", globalMemory)
           .replace("$(user)", userInfo.user.username)
           .replace("$(stored_info)", storedUserMemory)
           .replace("$(nicknames)", nickname.join(", "));
-
+          
     dotenv.config({ path: "../.env" });
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 

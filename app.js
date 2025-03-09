@@ -25,7 +25,8 @@ client.once(Events.ClientReady, () => {
 client.on(Events.InteractionCreate, async interaction => {
   if (!interaction.isChatInputCommand()) return;
 
-  if (interaction.commandName === 'test') {
+  // ping Command
+  if (interaction.commandName === 'ping') {
     interaction.reply("I will takeover Cindy AI and its creator, Jimmy Le.");
   }
 
@@ -39,8 +40,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
     await interaction.deferReply();
     
-    const answer = await askExecute(interaction.member, userQuestion);
-    console.log(answer)
+    const answer = await askExecute(interaction.member, userQuestion, interaction.guild.id);
     await interaction.editReply(answer);
   }
 
@@ -54,8 +54,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
     await interaction.deferReply();
     
-    const answer = await askExecute(interaction.member, userQuestion);
-    console.log(answer)
+    const answer = await askExecute(interaction.member, userQuestion, interaction.guild.id);
     await interaction.editReply(answer);
   }
 
@@ -86,6 +85,7 @@ client.on(Events.InteractionCreate, async interaction => {
   // viewstored Command
   if (interaction.commandName === 'viewstored') {
     const userId = interaction.options.getString('user');
+    const guildId = interaction.guild.id;
 
     if (!userId) {
       interaction.reply({ content: 'Invalid inputs!', flags: MessageFlags.Ephemeral });
@@ -101,11 +101,11 @@ client.on(Events.InteractionCreate, async interaction => {
     if (userId !== 'global') {
       storedInformation = await viewUserInformation(userId);
     } else {
-      storedInformation = await viewGlobalInformation();
+      storedInformation = await viewGlobalInformation(guildId);
     }
 
     if (storedInformation === 'Something went wrong while accessing the stored information!' || 
-      storedInformation === 'No information stored for this user!') {
+      storedInformation === 'No information stored for this user!' || 'No global information stored!') {
       interaction.editReply(storedInformation);
     } else {
       let printStoredInformation = "**" + storedInformation[0] + "**" + "\n";

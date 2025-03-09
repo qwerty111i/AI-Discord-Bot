@@ -9,13 +9,13 @@ const guildId = "1293953828256878685";
 // Define your command(s)
 const commands = [
   new SlashCommandBuilder()
-    .setName('test')
-    .setDescription('Replies with Pong!')
+    .setName('ping')
+    .setDescription('Learn my backstory...')
     .toJSON(), 
 
     new SlashCommandBuilder()
     .setName('ask')
-    .setDescription('Ask anything!')
+    .setDescription('Ask anything your heart desires!')
     .addStringOption(option =>
       option.setName('question')
         .setDescription('Enter your question.')
@@ -79,18 +79,11 @@ const commands = [
 const rest = new REST({ version: '10' }).setToken(token);
 
 (async () => {
-  try {    
-    // For a guild-based command (good for testing)
+  try {        
     await rest.put(
-      Routes.applicationGuildCommands(clientId, guildId),
+      Routes.applicationCommands(clientId),
       { body: commands }
     );
-    
-    // Uncomment the following code to register commands globally:
-    // await rest.put(
-    //   Routes.applicationCommands(clientId),
-    //   { body: commands }
-    // );
 
   } catch (error) {
     console.error(error);

@@ -29,9 +29,9 @@ async function viewUserInformation(userId) {
     }
 }
 
-async function viewGlobalInformation() {
+async function viewGlobalInformation(guild) {
     try {
-        const storedInformation = await viewGlobal();
+        const storedInformation = await viewGlobal(guild);
         return storedInformation;
     } catch(e) {
         return "Something went wrong while accessing the stored information!";
