@@ -65,21 +65,19 @@ client.on(Events.InteractionCreate, async interaction => {
 
     if (!userId || !information) {
       interaction.reply({ content: 'Invalid inputs!', flags: MessageFlags.Ephemeral });
-    }
-
-    if (interaction.member.user.id !== '496802108540977162' && interaction.member.user.id !== '434110212933419009') {
+    } else if (interaction.member.user.id !== '496802108540977162' && interaction.member.user.id !== '434110212933419009') {
       interaction.reply({ content: 'You are not authorized to use this command.', flags: MessageFlags.Ephemeral });
-    }
-
-    await interaction.deferReply();
-
-    let storedMessage;
-    if (userId !== 'global') {
-      storedMessage = await storeUserInformation(userId, information);
     } else {
-      storedMessage = await storeGlobalInformation(information);
+      await interaction.deferReply();
+
+      let storedMessage;
+      if (userId !== 'global') {
+        storedMessage = await storeUserInformation(userId, information);
+      } else {
+        storedMessage = await storeGlobalInformation(information);
+      }
+      await interaction.editReply(storedMessage);
     }
-    await interaction.editReply(storedMessage);
   }
 
   // viewstored Command
@@ -89,31 +87,29 @@ client.on(Events.InteractionCreate, async interaction => {
 
     if (!userId) {
       interaction.reply({ content: 'Invalid inputs!', flags: MessageFlags.Ephemeral });
-    }
-
-    if (interaction.member.user.id !== '496802108540977162' && interaction.member.user.id !== '434110212933419009') {
+    } else if (interaction.member.user.id !== '496802108540977162' && interaction.member.user.id !== '434110212933419009') {
       interaction.reply({ content: 'You are not authorized to use this command.', flags: MessageFlags.Ephemeral });
-    }
-
-    await interaction.deferReply();
-
-    let storedInformation;
-    if (userId !== 'global') {
-      storedInformation = await viewUserInformation(userId);
     } else {
-      storedInformation = await viewGlobalInformation(guildId);
-    }
+      await interaction.deferReply();
 
-    if (storedInformation === 'Something went wrong while accessing the stored information!' || 
-      storedInformation === 'No information stored for this user!' || 
-      storedInformation === 'No global information stored!') {
-      interaction.editReply(storedInformation);
-    } else {
-      let printStoredInformation = "**" + storedInformation[0] + "**" + "\n";
-      for (let i = 1; i < storedInformation.length; i++) {
-        printStoredInformation += i + ". " + storedInformation[i] + "\n";
+      let storedInformation;
+      if (userId !== 'global') {
+        storedInformation = await viewUserInformation(userId);
+      } else {
+        storedInformation = await viewGlobalInformation(guildId);
       }
-      await interaction.editReply(printStoredInformation.toString());
+  
+      if (storedInformation === 'Something went wrong while accessing the stored information!' || 
+        storedInformation === 'No information stored for this user!' || 
+        storedInformation === 'No global information stored!') {
+        interaction.editReply(storedInformation);
+      } else {
+        let printStoredInformation = "**" + storedInformation[0] + "**" + "\n";
+        for (let i = 1; i < storedInformation.length; i++) {
+          printStoredInformation += i + ". " + storedInformation[i] + "\n";
+        }
+        await interaction.editReply(printStoredInformation.toString());
+      }
     }
   }
 
@@ -124,21 +120,19 @@ client.on(Events.InteractionCreate, async interaction => {
 
     if (!userId) {
       interaction.reply({ content: 'Invalid inputs!', flags: MessageFlags.Ephemeral });
-    }
-
-    if (interaction.member.user.id !== '496802108540977162' && interaction.member.user.id !== '434110212933419009') {
+    } else if (interaction.member.user.id !== '496802108540977162' && interaction.member.user.id !== '434110212933419009') {
       interaction.reply({ content: 'You are not authorized to use this command.', flags: MessageFlags.Ephemeral });
-    }
-
-    await interaction.deferReply();
-
-    let deletionMessage;
-    if (userId !== 'global') {
-      deletionMessage = await deleteUserInformation(userId, index);
     } else {
-      deletionMessage = await deleteGlobalInformation(index);
+      await interaction.deferReply();
+
+      let deletionMessage;
+      if (userId !== 'global') {
+        deletionMessage = await deleteUserInformation(userId, index);
+      } else {
+        deletionMessage = await deleteGlobalInformation(index);
+      }
+      await interaction.editReply(deletionMessage);
     }
-    await interaction.editReply(deletionMessage);
   }
 
   // recap Command
