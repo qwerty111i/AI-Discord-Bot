@@ -7,16 +7,17 @@ ZeroShift is a Gemini powered discord bot that handles regular interactions with
 ## Features
 
 - **/ask:** Users can ask ZeroShift anything that they want!
-- **/summarize:** Users can summarize a certain number of past messages that they may have missed for a quick recap
-- **/math:** Users can understand how to solve complex math problems that may 
+- **/summarize:** Users can summarize a certain number of past messages that they may have missed for a quick recap.
+- **/math:** Users can understand how to solve complex math problems that may confuse simpletons.
 
 ## Version
 
-This bot is currently on v0.1.0-alpha.
+This bot is currently on v0.1.0-beta.
 
 ## Roadmap
 
 Below is the current roadmap of this discord bot.  For additional features you want to see, make an feature request!
 
-- **/summarize:** Users can summarize a certain number of past messages that they may have missed for a quick recap
-- **/math:** Users can understand how to solve complex math problems that may 
+- **Emoji Reactions:** If reactions are added to the bot, it will respond to it!
+- **Image Input Functionality** This includes inputting (and potentially outputting) images and other types of data formats!
+- **Expanded Recap Features** These include features such as seeing how many messages you've missed.
