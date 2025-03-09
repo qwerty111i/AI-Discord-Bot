@@ -105,7 +105,8 @@ client.on(Events.InteractionCreate, async interaction => {
     }
 
     if (storedInformation === 'Something went wrong while accessing the stored information!' || 
-      storedInformation === 'No information stored for this user!' || 'No global information stored!') {
+      storedInformation === 'No information stored for this user!' || 
+      storedInformation === 'No global information stored!') {
       interaction.editReply(storedInformation);
     } else {
       let printStoredInformation = "**" + storedInformation[0] + "**" + "\n";
