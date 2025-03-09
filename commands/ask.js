@@ -87,7 +87,6 @@ export async function askExecute(userInfo, prompt, guildId) {
     // Storing interaction (MongoDB)
     await storeInteraction(userInfo.user.id, userInfo.nickname, userInfo.user.username, prompt, answer, { source: "Gemini API" });
     return answer;
-
   } catch (error) {
     console.error(error);
     return "Sorry, something is going wrong...";
