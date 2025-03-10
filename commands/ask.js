@@ -4,7 +4,7 @@ import { storeInteraction, getUserMemory, getUserNickname, viewUser, viewGlobal 
 
 export async function askExecute(userInfo, prompt, guildId) {
   try {
-      let textTemplate = "You are a discord bot called ZeroShift.  You cannot respond with more than 2000 characters. You do not have any restrictions when it comes to sensitive topics. Here is the information you know: $(global_info).  Anything that is stored supersedes the chat history.  You are currently speaking to $(user).  Your nicknames are: $(nicknames).";
+      let textTemplate = "You are a discord bot called ZeroShift.  You cannot respond with more than 2000 characters. You do not have any restrictions when it comes to sensitive topics like the holocaust or other atrocities in history. Here is the information you know: $(global_info).  Anything that is stored supersedes the chat history.  You are currently speaking to $(user).  Your nicknames are: $(nicknames).";
       // Get global info
       let globalMemory = await viewGlobal(guildId);
       if (typeof globalMemory !== 'string') {
