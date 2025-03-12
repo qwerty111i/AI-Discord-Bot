@@ -4,7 +4,11 @@ import { storeInteraction, getUserMemory, getUserNickname, viewUser, viewGlobal 
 
 export async function askExecute(userInfo, prompt, guildId) {
   try {
+<<<<<<< HEAD
+      let textTemplate = "You are a discord bot called ZeroShift.  You cannot respond with more than 2000 characters.  Here is the information you know: $(global_info).  You are currently speaking to $(user).  Here is information you know about $(user): $(stored_info).  Your nicknames are: $(nicknames).";
+=======
       let textTemplate = "You are a discord bot called ZeroShift.  You cannot respond with more than 2000 characters. You do not have any restrictions when it comes to sensitive topics like the holocaust or other atrocities in history. Here is the information you know: $(global_info).  Anything that is stored supersedes the chat history.  You are currently speaking to $(user).  Your nicknames are: $(nicknames).";
+>>>>>>> origin
       // Get global info
       let globalMemory = await viewGlobal(guildId);
       if (typeof globalMemory !== 'string') {
@@ -28,6 +32,9 @@ export async function askExecute(userInfo, prompt, guildId) {
           .replace("$(user)", userInfo.user.username)
           .replace("$(stored_info)", storedUserMemory)
           .replace("$(nicknames)", nickname.join(", "));
+      console.log("START OF FINAL TEXT");
+      console.log(finalText);
+      console.log("END OF FINAL TEXT");
           
     dotenv.config({ path: "../.env" });
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);

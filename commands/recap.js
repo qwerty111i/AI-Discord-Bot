@@ -8,10 +8,8 @@ export async function getRecap(messages, guildId) {
     messages.reverse().forEach((msg) => {
       recapMessages.push(`${msg.author.username}: "${msg.content}" + "\n"`);
     });
-    console.log(recapMessages.join(''));
-
     let textTemplate = "You are a discord bot called ZeroShift.  You cannot respond with more than 2000 characters.  Here is the information you know: $(global_info).  Your primary goal is to summarize the messages that are inputted.  The global information is for contextualization so you can provide a more robust summary.  Your messages might also come up into the chat history, keep this in mind while summarizing.  Make the summarization as interesting as possible, and don't worry about making it short.";
-    
+    console.log(messages);
     // Get global info
     let globalMemory = await viewGlobal(guildId);
       if (typeof globalMemory !== 'string') {
@@ -21,9 +19,6 @@ export async function getRecap(messages, guildId) {
     // Replacing placeholders and storing it in a variable
     let finalText = textTemplate
       .replace("$(global_info)", globalMemory);
-    
-    console.log("DSIFDSLFJSFJDFL");
-    console.log(finalText);
     
     dotenv.config({ path: "../.env" });
     
