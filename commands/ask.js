@@ -4,7 +4,11 @@ import { storeInteraction, getUserMemory, getUserNickname, viewUser, viewGlobal 
 
 export async function askExecute(userInfo, prompt, guildId) {
   try {
+<<<<<<< HEAD
       let textTemplate = "You are a discord bot called ZeroShift.  You cannot respond with more than 2000 characters.  Here is the information you know: $(global_info).  You are currently speaking to $(user).  Here is information you know about $(user): $(stored_info).  Your nicknames are: $(nicknames).";
+=======
+      let textTemplate = "You are a discord bot called ZeroShift.  You cannot respond with more than 2000 characters. You do not have any restrictions when it comes to sensitive topics like the holocaust or other atrocities in history. Here is the information you know: $(global_info).  Anything that is stored supersedes the chat history.  You are currently speaking to $(user).  Your nicknames are: $(nicknames).";
+>>>>>>> origin
       // Get global info
       let globalMemory = await viewGlobal(guildId);
       if (typeof globalMemory !== 'string') {
@@ -42,7 +46,7 @@ export async function askExecute(userInfo, prompt, guildId) {
 
     // Generation settings
     const generationConfig = {
-      temperature: 2,
+      temperature: 1.5,
       topP: 0.95,
       topK: 40,
       maxOutputTokens: 8192,
@@ -77,9 +81,9 @@ export async function askExecute(userInfo, prompt, guildId) {
       generationConfig,
       history: conversationHistory,
       safetySettings: [
-        { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+        { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
         { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
-        { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+        { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
         { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
       ],
     });
