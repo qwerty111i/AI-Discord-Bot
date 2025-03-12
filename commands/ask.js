@@ -39,8 +39,8 @@ export async function askExecute(userInfo, prompt, guildId) {
 
     // Generation settings
     const generationConfig = {
-      temperature: 2,
-      topP: 0.95,
+      temperature: 1.5,
+      topP: 0.80,
       topK: 40,
       maxOutputTokens: 8192,
       responseMimeType: "text/plain",
