@@ -1,5 +1,6 @@
 import { Client, GatewayIntentBits, Events, MessageFlags } from 'discord.js';
 import { askExecute } from './commands/ask.js';
+import { calculate } from './commands/math.js';
 import { getRecap } from './commands/recap.js';
 import { storeUserInformation, storeGlobalInformation, viewUserInformation, viewGlobalInformation, 
   deleteUserInformation, deleteGlobalInformation } from './commands/store.js';
@@ -59,7 +60,7 @@ client.on(Events.InteractionCreate, async interaction => {
         await interaction.reply({ content: 'You didn\'t give me anything to answer.', flags: MessageFlags.Ephemeral });
       } else {
         await interaction.deferReply();
-        const answer = await askExecute(interaction.member, userQuestion, interaction.guild.id);
+        const answer = await calculate(userQuestion);
         await interaction.editReply(answer);
       }
     } catch (e) {

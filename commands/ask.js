@@ -28,9 +28,6 @@ export async function askExecute(userInfo, prompt, guildId) {
           .replace("$(user)", userInfo.user.username)
           .replace("$(stored_info)", storedUserMemory)
           .replace("$(nicknames)", nickname.join(", "));
-      console.log("START OF FINAL TEXT");
-      console.log(finalText);
-      console.log("END OF FINAL TEXT");
           
     dotenv.config({ path: "../.env" });
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -83,6 +80,9 @@ export async function askExecute(userInfo, prompt, guildId) {
         { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
       ],
     });
+
+    const countResult = await model.countTokens("this is a long prompt");
+    console.log(countResult);
 
     const result = await chatSession.sendMessage(prompt);
     const answer = result.response?.text() || "I don't want to talk to you right now.";
