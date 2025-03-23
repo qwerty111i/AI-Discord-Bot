@@ -13,15 +13,27 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction) {
   const userQuestion = interaction.options.getString('question');
-    
+
   if (!userQuestion) {
     await interaction.reply({ content: 'You didn\'t give me anything to answer.', flags: MessageFlags.Ephemeral });
   } else {
     await interaction.deferReply();
-    const answer = await askExecute(interaction.member, userQuestion, interaction.guild.id);
-    await interaction.editReply(answer);
+    let answer = await askExecute(interaction.member, userQuestion, interaction.guild.id);
+    let counter = 0;
+
+    answer = "```" + interaction.member.nickname + ": " + userQuestion + "```\n" + answer;
+    const messageChunks = splitMessage(answer);
+    
+    for (const chunk of messageChunks) {
+      if (counter = 0) {
+        await interaction.editReply(chunk);
+      } else {
+        await interaction.followUp(chunk);
+      }
+    }
   }
 }
+
 
 async function askExecute(userInfo, prompt, guildId) {
   try {
@@ -115,4 +127,32 @@ async function askExecute(userInfo, prompt, guildId) {
     console.error(error);
     return "Sorry, something is going wrong...";
   }
+}
+
+
+function splitMessage(message) {
+  // Split message by sentence-ending punctuation, keeping punctuation
+  const sentences = message.split(/(?<=[.!?:])\s+/);
+  
+  let chunk = '';
+  let messageChunks = [];
+
+  // Iterate through sentences and build message chunks
+  for (const sentence of sentences) {
+    // Check if adding this sentence exceeds the character limit
+    if (chunk.length + sentence.length + 1 <= 2000) {
+      chunk += sentence + ' '; // Add sentence to the current chunk
+    } else {
+      // If the limit is exceeded, push the current chunk and start a new one
+      messageChunks.push(chunk.trim());
+      chunk = sentence + ' '; // Start a new chunk with the current sentence
+    }
+  }
+
+  // Push the remaining chunk
+  if (chunk.length > 0) {
+    messageChunks.push(chunk.trim());
+  }
+
+  return messageChunks;
 }
