@@ -1,8 +1,30 @@
+import { SlashCommandBuilder } from 'discord.js';
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import { viewGlobal } from '../database/memory.js';
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 
-export async function getRecap(messages, guildId) {
+export const data = new SlashCommandBuilder()
+    .setName('recap')
+    .setDescription('Missed a ton of messages?  Get a quick recap!')
+    .addIntegerOption(option =>
+    option.setName('number')
+        .setDescription('Enter the number of past messages to recap.')
+        .setRequired(true));
+
+export async function execute(interaction) {
+    const numMessages = interaction.options.getInteger('number');  
+       
+    if (numMessages < 1 || numMessages > 99) {
+        await interaction.reply({ content: "Invalid message count!", flags: MessageFlags.Ephemeral });
+    } else {
+        const messages = await interaction.channel.messages.fetch({ limit: numMessages });
+        await interaction.deferReply();
+        const recap = await getRecap(messages, interaction.guild.id);
+        await interaction.editReply(recap);
+    }
+}
+
+async function getRecap(messages, guildId) {
   try {
     let recapMessages = [];
     messages.reverse().forEach((msg) => {
@@ -53,7 +75,6 @@ export async function getRecap(messages, guildId) {
     const result = await chatSession.sendMessage(recapMessages);
     const answer = result.response?.text() || "I don't want to talk to you right now.";
     return answer;
-
   } catch (error) {
     console.error(error);
     return "Sorry, something is going wrong...";
