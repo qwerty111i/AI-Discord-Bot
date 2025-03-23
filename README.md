@@ -21,3 +21,5 @@ Below is the current roadmap of this discord bot.  For additional features you w
 - **Emoji Reactions:** If reactions are added to the bot, it will respond to it!
 - **Image Input Functionality:** This includes inputting (and potentially outputting) images and other types of data formats!
 - **Expanded Recap Features:** These include features such as seeing how many messages you've missed.
+
+![2025-03-2222-48-14-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/7c59cc30-9d22-41e2-b60e-0f1d0f809e5c)
