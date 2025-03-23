@@ -12,7 +12,7 @@ ZeroShift is a Gemini powered discord bot that handles regular interactions with
 
 ## Version
 
-This bot is currently on v0.1.0-beta.
+This bot is currently on v0.1.1-beta.
 
 ## Roadmap
 
