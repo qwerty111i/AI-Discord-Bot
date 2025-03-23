@@ -1,36 +1,36 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { storeUserInformation, storeGlobalInformation } from '../database/store.js';
+import { deleteUserInformation, deleteGlobalInformation } from '../database/store.js';
 
 export const data = new SlashCommandBuilder()
-    .setName('store')
-    .setDescription('Store information about users.')
+    .setName('deletestored')
+    .setDescription('Delete stored information about users.')
     .addStringOption(option =>
     option.setName('user')
         .setDescription('Enter a user ID.')
         .setRequired(true))
-    .addStringOption(option =>
-    option.setName('information')
-        .setDescription('Enter information.')
+    .addIntegerOption(option =>
+    option.setName('index')
+        .setDescription('Enter memory index.')
         .setRequired(true));
 
 export async function execute(interaction) {
     const userId = interaction.options.getString('user');
-    const information = interaction.options.getString('information');
-  
-    if (!userId || !information) {
+    const index = interaction.options.getInteger('index') - 1;
+
+    if (!userId) {
         await interaction.reply({ content: 'Invalid inputs!', flags: MessageFlags.Ephemeral });
     } else if (interaction.member.user.id !== '496802108540977162' && interaction.member.user.id !== '434110212933419009') {
         await interaction.reply({ content: 'You are not authorized to use this command.', flags: MessageFlags.Ephemeral });
     } else {
         await interaction.deferReply();
 
-        let storedMessage;
+        let deletionMessage;
         if (userId !== 'global') {
-            storedMessage = await storeUserInformation(userId, information);
+            deletionMessage = await deleteUserInformation(userId, index);
         } else {
-            storedMessage = await storeGlobalInformation(information);
+            deletionMessage = await deleteGlobalInformation(index);
         }
-
-        await interaction.editReply(storedMessage);
+        
+        await interaction.editReply(deletionMessage);
     }
 }

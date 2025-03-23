@@ -1,7 +1,28 @@
+import { SlashCommandBuilder } from 'discord.js';
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 
-export async function calculate(prompt) {
+export const data = new SlashCommandBuilder()
+    .setName('math')
+    .setDescription('Solve complex math problems!')
+    .addStringOption(option =>
+    option.setName('problem')
+        .setDescription('Enter the problem.')
+        .setRequired(true));
+
+export async function execute(interaction) {
+    const userQuestion = interaction.options.getString('problem');
+
+    if (!userQuestion) {
+        await interaction.reply({ content: 'You didn\'t give me anything to answer.', flags: MessageFlags.Ephemeral });
+      } else {
+        await interaction.deferReply();
+        const answer = await calculate(userQuestion);
+        await interaction.editReply(answer);
+      }
+}
+
+async function calculate(prompt) {
   try {
     dotenv.config({ path: "../.env" });
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -35,7 +56,6 @@ export async function calculate(prompt) {
     const result = await chatSession.sendMessage(prompt);
     const answer = result.response?.text() || "I don't want to talk to you right now.";
     return answer;
-
   } catch (error) {
     console.error(error);
     return "Sorry, something is going wrong...";

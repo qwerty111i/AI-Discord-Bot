@@ -1,34 +1,55 @@
+import { SlashCommandBuilder } from 'discord.js';
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
 import { storeInteraction, getUserMemory, getUserNickname, viewUser, viewGlobal } from "../database/memory.js";
 
-export async function askExecute(userInfo, prompt, guildId) {
+export const data = new SlashCommandBuilder()
+  .setName('ask')
+  .setDescription('Ask anything your heart desires!')
+  .addStringOption(option =>
+    option.setName('question')
+      .setDescription('Enter your question.')
+      .setRequired(true));
+
+export async function execute(interaction) {
+  const userQuestion = interaction.options.getString('question');
+    
+  if (!userQuestion) {
+    await interaction.reply({ content: 'You didn\'t give me anything to answer.', flags: MessageFlags.Ephemeral });
+  } else {
+    await interaction.deferReply();
+    const answer = await askExecute(interaction.member, userQuestion, interaction.guild.id);
+    await interaction.editReply(answer);
+  }
+}
+
+async function askExecute(userInfo, prompt, guildId) {
   try {
-      let textTemplate = "You are a discord bot called ZeroShift.  You cannot respond with more than 2000 characters.  Here is the information you know: $(global_info).  You are currently speaking to $(user).  Here is information you know about $(user): $(stored_info).  Your nicknames are: $(nicknames).";
-      // Get global info
-      let globalMemory = await viewGlobal(guildId);
-      if (typeof globalMemory !== 'string') {
-        globalMemory = globalMemory.join("\n");
-      }
-      
-      // Get user info
-      let nickname = await getUserNickname(userInfo.user.id)
-      if (!nickname) {
-        nickname = "null";
-      }
+    let textTemplate = "You are a discord bot called ZeroShift.  You cannot respond with more than 2000 characters.  Here is the information you know: $(global_info).  You are currently speaking to $(user).  Here is information you know about $(user): $(stored_info).  Your nicknames are: $(nicknames).";
+    // Get global info
+    let globalMemory = await viewGlobal(guildId);
+    if (typeof globalMemory !== 'string') {
+      globalMemory = globalMemory.join("\n");
+    }
+    
+    // Get user info
+    let nickname = await getUserNickname(userInfo.user.id)
+    if (!nickname) {
+      nickname = "null";
+    }
 
-      let storedUserMemory = await viewUser(userInfo.user.id)
-      if (typeof storedUserMemory !== 'string') {
-        storedUserMemory = storedUserMemory.join("\n");
-      }
+    let storedUserMemory = await viewUser(userInfo.user.id)
+    if (typeof storedUserMemory !== 'string') {
+      storedUserMemory = storedUserMemory.join("\n");
+    }
 
-      // Replacing placeholders and storing it in a variable
-      let finalText = textTemplate
-          .replace("$(global_info)", globalMemory)
-          .replace("$(user)", userInfo.user.username)
-          .replace("$(stored_info)", storedUserMemory)
-          .replace("$(nicknames)", nickname.join(", "));
-          
+    // Replacing placeholders and storing it in a variable
+    let finalText = textTemplate
+        .replace("$(global_info)", globalMemory)
+        .replace("$(user)", userInfo.user.username)
+        .replace("$(stored_info)", storedUserMemory)
+        .replace("$(nicknames)", nickname.join(", "));
+        
     dotenv.config({ path: "../.env" });
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
