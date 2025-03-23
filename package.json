@@ -25,6 +25,7 @@
     "from": "^0.1.7",
     "intents": "^0.1.1",
     "mongodb": "^6.14.0",
+    "node-fetch": "^3.3.2",
     "openssl-nodejs": "^1.0.5",
     "ws": "^8.18.1"
   },
