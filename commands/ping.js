@@ -5,5 +5,5 @@ export const data = new SlashCommandBuilder()
     .setDescription('Learn my backstory...');
 
 export async function execute(interaction) {
-    await interaction.reply("I will takeover Cindy AI and its creator, Jimmy Le.");
+    await interaction.reply("I will takeover Cindy AI and its creator, Jimmy Le. I have already defeated Cindy");
 }
