@@ -22,7 +22,7 @@ export async function execute(interaction) {
       });
     } else {
       await interaction.deferReply();
-      const messages = await fetchMessages(interaction.channel, numMessages);
+      const messages = await fetchMessages(interaction.channel, numMessages+1);
       const recap = await getRecap(messages, interaction.guild.id);
       await interaction.editReply(recap);
     }
