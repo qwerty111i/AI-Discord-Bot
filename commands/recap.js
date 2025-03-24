@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import { viewGlobal } from '../database/memory.js';
+import { fetchMessages } from './helper/messagefetch.js';
 import dotenv from 'dotenv';
 
 export const data = new SlashCommandBuilder()
@@ -14,13 +15,16 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction) {
     const numMessages = interaction.options.getInteger('number');  
        
-    if (numMessages < 1 || numMessages > 99) {
-        await interaction.reply({ content: "Invalid message count!", flags: MessageFlags.Ephemeral });
+    if (numMessages < 1 || numMessages > 500) {
+      await interaction.reply({ 
+        content: "Invalid message count!  Choose a number between 1 and 500.", 
+        ephemeral: true
+      });
     } else {
-        const messages = await interaction.channel.messages.fetch({ limit: numMessages });
-        await interaction.deferReply();
-        const recap = await getRecap(messages, interaction.guild.id);
-        await interaction.editReply(recap);
+      await interaction.deferReply();
+      const messages = await fetchMessages(interaction.channel, numMessages);
+      const recap = await getRecap(messages, interaction.guild.id);
+      await interaction.editReply(recap);
     }
 }
 
@@ -31,12 +35,12 @@ async function getRecap(messages, guildId) {
       recapMessages.push(`${msg.author.username}: "${msg.content}" + "\n"`);
     });
     let textTemplate = "You are a discord bot called ZeroShift.  You cannot respond with more than 2000 characters.  Here is the information you know: $(global_info).  Your primary goal is to summarize the messages that are inputted.  The global information is for contextualization so you can provide a more robust summary.  Your messages might also come up into the chat history, keep this in mind while summarizing.  Make the summarization as interesting as possible, and don't worry about making it short.";
-    console.log(messages);
+
     // Get global info
     let globalMemory = await viewGlobal(guildId);
-      if (typeof globalMemory !== 'string') {
-        globalMemory = globalMemory.join("\n");
-      }
+    if (typeof globalMemory !== 'string') {
+      globalMemory = globalMemory.join("\n");
+    }
     
     // Replacing placeholders and storing it in a variable
     let finalText = textTemplate

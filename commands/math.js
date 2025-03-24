@@ -16,7 +16,7 @@ export async function execute(interaction) {
   const userQuestion = interaction.options.getString('problem');
 
   if (!userQuestion) {
-    await interaction.reply({ content: 'You didn\'t give me anything to answer.', flags: MessageFlags.Ephemeral });
+    await interaction.reply({ content: 'You didn\'t give me anything to answer.', ephemeral: true });
   } else {
     await interaction.deferReply();
     let answer = await calculate(interaction.member, userQuestion);
@@ -62,8 +62,7 @@ export async function execute(interaction) {
 
       // Linking the user to the thread
       await interaction.editReply({ 
-        content: `I've created a thread to answer your question: <#${thread.id}>`, 
-        ephemeral: true 
+        content: `I've created a thread to answer your question: <#${thread.id}>`
       });
     }
   }
