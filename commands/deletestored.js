@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { deleteUserInformation, deleteGlobalInformation } from '../database/store.js';
+import { deleteUser, deleteGlobal } from '../database/memory.js';
 
 export const data = new SlashCommandBuilder()
     .setName('deletestored')
@@ -32,5 +32,23 @@ export async function execute(interaction) {
         }
         
         await interaction.editReply(deletionMessage);
+    }
+}
+
+async function deleteUserInformation(userId, index) {
+    try {
+        const deletionMessage = await deleteUser(userId, index);
+        return deletionMessage;
+    } catch (e) {
+        return "Something went wrong while trying to delete this user's information.";
+    }
+}
+
+async function deleteGlobalInformation(index) {
+    try {
+        const deletionMessage = await deleteGlobal(index);
+        return deletionMessage;
+    } catch (e) {
+        return "Something went wrong while trying to delete global information."
     }
 }
