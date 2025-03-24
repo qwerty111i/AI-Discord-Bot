@@ -5,8 +5,8 @@ import { splitMessage } from './helper/messagesplit.js';
 import { storeMathInteraction, getMathMemory } from '../database/memory.js';
 
 export const data = new SlashCommandBuilder()
-    .setName('math')
-    .setDescription('Solve complex math problems!')
+    .setName('solve')
+    .setDescription('Solve complex logic problems!')
     .addStringOption(option =>
     option.setName('problem')
         .setDescription('Enter the problem.')
