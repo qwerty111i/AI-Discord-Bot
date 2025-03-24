@@ -1,33 +1,39 @@
 import { connectToMongoDB } from './db.js';
 
 // Storing user chat history
-async function storeInteraction(userId, permenantUsername, serverNickname, question, answer) {
+export async function storeInteraction(userId, permenantUsername, serverNickname, question, answer) {
   const db = await connectToMongoDB();
   const collection = db.collection('user_memory');
-
   const userMemory = await collection.findOne({ userId });
+
+  const updateFields = {
+    $addToSet: { permenant_username: permenantUsername },
+    $push: { chat_history: { question, answer } }
+  };
+
+  if (serverNickname) {
+    updateFields.$addToSet.server_nicknames = serverNickname;
+  }
+
   if (userMemory) {
     await collection.updateOne(
         { userId },
-        { 
-          $addToSet: { permenant_username: permenantUsername },
-          $addToSet: { server_nicknames: serverNickname },
-          $push: { chat_history: { question, answer } }
-        }
+        updateFields
       );
   } else {
     await collection.insertOne({
       userId,
       permenant_username: [ permenantUsername ],
-      server_nicknames: [ serverNickname ],
+      server_nicknames: serverNickname ? [ serverNickname ] : [],
       chat_history: [{ question, answer }],
+      math_history: [],
       stored_information: []
     });
   }
 }
 
-// Storing user information
-async function storeUser(userId, information) {
+// Storing user information using store command
+export async function storeUser(userId, information) {
   const db = await connectToMongoDB();
   const collection = db.collection('user_memory');
 
@@ -45,6 +51,7 @@ async function storeUser(userId, information) {
       permanent_username: [],
       server_nicknames: [],
       chat_history: [],
+      math_history: [],
       stored_information: [information]
     });
   }
@@ -52,8 +59,8 @@ async function storeUser(userId, information) {
   return "Operation Successful!\n\n" + user + "**Stored: **" + information;
 }
 
-// Storing global information
-async function storeGlobal(information) {
+// Storing global information using store command
+export async function storeGlobal(information) {
   const db = await connectToMongoDB();
   const collection = db.collection('global_memory');
 
@@ -74,8 +81,8 @@ async function storeGlobal(information) {
   return "Operation Successful!\n\n**Stored: **" + information;
 }
 
-// Accessing user stored information
-async function viewUser(userId) {
+// Accessing user stored information using viewstored command
+export async function viewUser(userId) {
   const db = await connectToMongoDB();
   const collection = db.collection('user_memory');
 
@@ -89,8 +96,8 @@ async function viewUser(userId) {
   return userMemory ? storedInformation : "No information stored for this user!";
 }
 
-// Accessing global stored information
-async function viewGlobal(guild) {
+// Accessing global stored information using viewstored command
+export async function viewGlobal(guild) {
   const db = await connectToMongoDB();
   const collection = db.collection('global_memory');
 
@@ -108,8 +115,8 @@ async function viewGlobal(guild) {
   }
 }
 
-// Deleting user stored information
-async function deleteUser(userId, index) {
+// Deleting user stored information using deletestored command
+export async function deleteUser(userId, index) {
   const db = await connectToMongoDB();
   const collection = db.collection('user_memory');
 
@@ -134,8 +141,8 @@ async function deleteUser(userId, index) {
   }
 }
 
-// Deleting global stored information
-async function deleteGlobal(index) {
+// Deleting global stored information using deletestored command
+export async function deleteGlobal(index) {
   const db = await connectToMongoDB();
   const collection = db.collection('global_memory');
 
@@ -159,10 +166,47 @@ async function deleteGlobal(index) {
   }
 }
 
+// Storing user's math history (last 5 interactions)
+export async function storeMathInteraction(userId, permenantUsername, serverNickname, question, answer) {
+  const db = await connectToMongoDB();
+  const collection = db.collection('user_memory');
+  const userMemory = await collection.findOne({ userId });
+
+  const updateFields = {
+    $addToSet: { permenant_username: permenantUsername },
+    $push: { 
+      math_history: { 
+        $each: [{ question, answer }] ,
+        $slice: -5, // Only storing the last 5 entries
+      },
+    },
+  };
+
+  if (serverNickname) {
+    updateFields.$addToSet.server_nicknames = serverNickname;
+  }
+
+  if (userMemory) {
+    await collection.updateOne(
+        { userId },
+        updateFields
+      );
+  } else {
+    await collection.insertOne({
+      userId,
+      permenant_username: [ permenantUsername ],
+      server_nicknames: serverNickname ? [ serverNickname ] : [],
+      chat_history: [],
+      math_history: [{ question, answer }],
+      stored_information: []
+    });
+  }
+}
+
 /** Getters */
 
 // Getting chat history
-async function getUserMemory(userId) {
+export async function getUserMemory(userId) {
   const db = await connectToMongoDB();
   const collection = db.collection('user_memory');
 
@@ -170,8 +214,17 @@ async function getUserMemory(userId) {
   return userMemory ? userMemory.chat_history : [];
 }
 
+// Getting math history
+export async function getMathMemory(userId) {
+  const db = await connectToMongoDB();
+  const collection = db.collection('user_memory');
+
+  const userMemory = await collection.findOne({ userId });
+  return userMemory ? userMemory.math_history : [];
+}
+
 // Getting user nickname list
-async function getUserNickname(userId) {
+export async function getUserNickname(userId) {
   const db = await connectToMongoDB();
   const collection = db.collection('user_memory');
 
@@ -180,7 +233,7 @@ async function getUserNickname(userId) {
 }
 
 // Getting user's permenant username
-async function getPermenantUsername(userId) {
+export async function getPermenantUsername(userId) {
   const db = await connectToMongoDB();
   const collection = db.collection('user_memory');
 
@@ -193,6 +246,3 @@ async function getPermenantUsername(userId) {
   }
   return username;
 }
-
-export { storeInteraction, storeUser, storeGlobal, viewUser, viewGlobal, 
-  deleteUser, deleteGlobal, getUserNickname, getUserMemory };
