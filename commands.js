@@ -34,7 +34,7 @@ const rest = new REST({ version: '10' }).setToken(token);
     console.log(`Refreshing ${commands.length} commands`);
 
     // Routes.applicationCommands(clientId),
-    // Routes.applicationGuildCommands(clientId, guildId)
+    // Routes.applicationGuildCommands(clientId, guildId),
 
     await rest.put(
       Routes.applicationCommands(clientId),

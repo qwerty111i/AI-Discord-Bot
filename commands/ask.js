@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from 'discord.js';
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import dotenv from 'dotenv';
 import { storeInteraction, getUserMemory, getUserNickname, viewUser, viewGlobal } from "../database/memory.js";
+import { splitMessage } from './helper/messagesplit.js';
 
 export const data = new SlashCommandBuilder()
   .setName('ask')
@@ -19,17 +20,20 @@ export async function execute(interaction) {
   } else {
     await interaction.deferReply();
     let answer = await askExecute(interaction.member, userQuestion, interaction.guild.id);
-    let counter = 0;
 
-    answer = "```" + interaction.member.nickname + ": " + userQuestion + "```\n" + answer;
+    let displayName = "";
+    if (interaction.member.nickname == null) {
+      displayName = interaction.member.user.username;
+    } else {
+      displayName = interaction.member.nickname;
+    }
+
+    answer = "```" + displayName + ": " + userQuestion + "```\n" + answer;
     const messageChunks = splitMessage(answer);
     
-    for (const chunk of messageChunks) {
-      if (counter = 0) {
-        await interaction.editReply(chunk);
-      } else {
-        await interaction.followUp(chunk);
-      }
+    await interaction.editReply(messageChunks[0]);
+    for (let i = 1; i < messageChunks.length; i++) {
+      await interaction.followUp(messageChunks[i]);
     }
   }
 }
@@ -114,9 +118,6 @@ async function askExecute(userInfo, prompt, guildId) {
       ],
     });
 
-    const countResult = await model.countTokens("this is a long prompt");
-    console.log(countResult);
-
     const result = await chatSession.sendMessage(prompt);
     const answer = result.response?.text() || "I don't want to talk to you right now.";
 
@@ -127,32 +128,4 @@ async function askExecute(userInfo, prompt, guildId) {
     console.error(error);
     return "Sorry, something is going wrong...";
   }
-}
-
-
-function splitMessage(message) {
-  // Split message by sentence-ending punctuation, keeping punctuation
-  const sentences = message.split(/(?<=[.!?:])\s+/);
-  
-  let chunk = '';
-  let messageChunks = [];
-
-  // Iterate through sentences and build message chunks
-  for (const sentence of sentences) {
-    // Check if adding this sentence exceeds the character limit
-    if (chunk.length + sentence.length + 1 <= 2000) {
-      chunk += sentence + ' '; // Add sentence to the current chunk
-    } else {
-      // If the limit is exceeded, push the current chunk and start a new one
-      messageChunks.push(chunk.trim());
-      chunk = sentence + ' '; // Start a new chunk with the current sentence
-    }
-  }
-
-  // Push the remaining chunk
-  if (chunk.length > 0) {
-    messageChunks.push(chunk.trim());
-  }
-
-  return messageChunks;
 }

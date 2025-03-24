@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { viewUserInformation, viewGlobalInformation } from '../database/store.js';
+import { viewUser, viewGlobal } from '../database/memory.js';
 
 export const data = new SlashCommandBuilder()
 .setName('viewstored')
@@ -39,5 +39,23 @@ export async function execute(interaction) {
             
             await interaction.editReply(printStoredInformation.toString());
         }
+    }
+}
+
+async function viewUserInformation(userId) {
+    try {
+        const storedInformation = await viewUser(userId);
+        return storedInformation;
+    } catch (e) {
+        return "Something went wrong while accessing the stored information!";
+    }
+}
+
+async function viewGlobalInformation(guild) {
+    try {
+        const storedInformation = await viewGlobal(guild);
+        return storedInformation;
+    } catch(e) {
+        return "Something went wrong while accessing the stored information!";
     }
 }

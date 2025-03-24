@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import dotenv from 'dotenv';
+import { splitMessage } from './helper/messagesplit.js';
 
 export const data = new SlashCommandBuilder()
     .setName('math')
@@ -18,17 +19,51 @@ export async function execute(interaction) {
   } else {
     await interaction.deferReply();
     let answer = await calculate(userQuestion);
-    let counter = 0;
 
-    answer = "```" + interaction.member.nickname + ": " + userQuestion + "```\n" + answer;
+    // Getting the user's display name
+    let displayName = "";
+    if (interaction.member.nickname == null) {
+      displayName = interaction.member.user.username;
+    } else {
+      displayName = interaction.member.nickname;
+    }
+
+    // Adding the question to the answer
+    answer = "```" + displayName + ": " + userQuestion + "```\n" + answer;
     const messageChunks = splitMessage(answer);
     
-    for (const chunk of messageChunks) {
-      if (counter = 0) {
-        await interaction.editReply(chunk);
-      } else {
-        await interaction.followUp(chunk);
+    if (interaction.channel.isThread()) {
+      // Responding in the thread
+      let lastMessage = await interaction.editReply(messageChunks[0]);
+
+      for (let i = 1; i < messageChunks.length; i++) {
+        lastMessage = await lastMessage.channel.send({
+          content: messageChunks[i],
+          reply: { messageReference: lastMessage.id }
+        });
       }
+    } else {
+      // Creating the thread
+      const thread = await interaction.channel.threads.create({
+        name: userQuestion.slice(0, 100),
+        autoArchiveDuration: 60,
+        reason: 'User asked a math question',
+      });
+
+      // Sending the response in the new thread
+      let lastMessage = await thread.send(messageChunks[0]);
+      for (let i = 1; i < messageChunks.length; i++) {
+        lastMessage = await thread.send({
+          content: messageChunks[i],
+          reply: { messageReference: lastMessage.id }
+        });
+      }
+
+      // Linking the user to the thread
+      await interaction.editReply({ 
+        content: `I've created a thread to answer your question: <#${thread.id}>`, 
+        ephemeral: true 
+      });
     }
   }
 }
@@ -71,31 +106,4 @@ async function calculate(prompt) {
     console.error(error);
     return "Sorry, something is going wrong...";
   }
-}
-
-function splitMessage(message) {
-  // Split message by sentence-ending punctuation, keeping punctuation
-  const sentences = message.split(/(?<=[.!?:])\s+/);
-  
-  let chunk = '';
-  let messageChunks = [];
-
-  // Iterate through sentences and build message chunks
-  for (const sentence of sentences) {
-    // Check if adding this sentence exceeds the character limit
-    if (chunk.length + sentence.length + 1 <= 2000) {
-      chunk += sentence + ' '; // Add sentence to the current chunk
-    } else {
-      // If the limit is exceeded, push the current chunk and start a new one
-      messageChunks.push(chunk.trim());
-      chunk = sentence + ' '; // Start a new chunk with the current sentence
-    }
-  }
-
-  // Push the remaining chunk
-  if (chunk.length > 0) {
-    messageChunks.push(chunk.trim());
-  }
-
-  return messageChunks;
 }

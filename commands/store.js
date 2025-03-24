@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { storeUserInformation, storeGlobalInformation } from '../database/store.js';
+import { storeUser, storeGlobal } from '../database/memory.js';
 
 export const data = new SlashCommandBuilder()
     .setName('store')
@@ -32,5 +32,24 @@ export async function execute(interaction) {
         }
 
         await interaction.editReply(storedMessage);
+    }
+}
+
+async function storeUserInformation(userId, information) {
+    try {
+        const storedMessage = await storeUser(userId, information);
+        return storedMessage
+    } catch(e) {
+        console.log(e);
+        return "Something went wrong while storing this message!";
+    }
+}
+
+async function storeGlobalInformation(information) {
+    try {
+        const storedMessage = await storeGlobal(information);
+        return storedMessage;
+    } catch(e) {
+        return "Something went wrong while storing this global message!";
     }
 }
