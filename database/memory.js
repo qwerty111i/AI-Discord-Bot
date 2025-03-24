@@ -26,7 +26,7 @@ export async function storeInteraction(userId, permenantUsername, serverNickname
       permenant_username: [ permenantUsername ],
       server_nicknames: serverNickname ? [ serverNickname ] : [],
       chat_history: [{ question, answer }],
-      math_history: [],
+      logic_history: [],
       stored_information: []
     });
   }
@@ -51,7 +51,7 @@ export async function storeUser(userId, information) {
       permanent_username: [],
       server_nicknames: [],
       chat_history: [],
-      math_history: [],
+      logic_history: [],
       stored_information: [information]
     });
   }
@@ -166,8 +166,8 @@ export async function deleteGlobal(index) {
   }
 }
 
-// Storing user's math history (last 5 interactions)
-export async function storeMathInteraction(userId, permenantUsername, serverNickname, question, answer) {
+// Storing user's logic history (last 5 interactions)
+export async function storeLogicInteraction(userId, permenantUsername, serverNickname, question, answer) {
   const db = await connectToMongoDB();
   const collection = db.collection('user_memory');
   const userMemory = await collection.findOne({ userId });
@@ -175,7 +175,7 @@ export async function storeMathInteraction(userId, permenantUsername, serverNick
   const updateFields = {
     $addToSet: { permenant_username: permenantUsername },
     $push: { 
-      math_history: { 
+      logic_history: { 
         $each: [{ question, answer }] ,
         $slice: -5, // Only storing the last 5 entries
       },
@@ -197,7 +197,7 @@ export async function storeMathInteraction(userId, permenantUsername, serverNick
       permenant_username: [ permenantUsername ],
       server_nicknames: serverNickname ? [ serverNickname ] : [],
       chat_history: [],
-      math_history: [{ question, answer }],
+      logic_history: [{ question, answer }],
       stored_information: []
     });
   }
@@ -214,13 +214,13 @@ export async function getUserMemory(userId) {
   return userMemory ? userMemory.chat_history : [];
 }
 
-// Getting math history
-export async function getMathMemory(userId) {
+// Getting logic history
+export async function getLogicMemory(userId) {
   const db = await connectToMongoDB();
   const collection = db.collection('user_memory');
 
   const userMemory = await collection.findOne({ userId });
-  return userMemory ? userMemory.math_history : [];
+  return userMemory ? userMemory.logic_history : [];
 }
 
 // Getting user nickname list

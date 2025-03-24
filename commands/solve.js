@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from 'discord.js';
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import dotenv from 'dotenv';
 import { splitMessage } from './helper/messagesplit.js';
-import { storeMathInteraction, getMathMemory } from '../database/memory.js';
+import { storeLogicInteraction, getLogicMemory } from '../database/memory.js';
 
 export const data = new SlashCommandBuilder()
     .setName('solve')
@@ -48,7 +48,7 @@ export async function execute(interaction) {
       const thread = await interaction.channel.threads.create({
         name: userQuestion.slice(0, 100),
         autoArchiveDuration: 60,
-        reason: 'User asked a math question',
+        reason: 'User asked a logic question',
       });
 
       // Sending the response in the new thread
@@ -75,7 +75,7 @@ async function calculate(userInfo, prompt) {
 
     const model = genAI.getGenerativeModel({
       model: "gemini-2.0-flash-thinking-exp-01-21", 
-      systemInstruction: "You are a math wizard discord bot called ZeroShift. Use the backtick symbols in markdown instead of LaTeX. Avoid LaTeX formatting as well. Your main goal is to solve math problems, and explain how to solve them clearly.  Act as if you were the one who discovered all the math theorems and formulas.  If the user sends you a stupid question, feel free to make fun of them!",
+      systemInstruction: "You are a math wizard discord bot called ZeroShift. Use the backtick symbols in markdown instead of LaTeX. Avoid LaTeX formatting as well. Your main goal is to solve problems, and explain how to solve them clearly.  Act as if you were the one who discovered all the theorems and formulas.  If the user sends you a stupid question, feel free to make fun of them!",
     });
 
     // Generation settings
@@ -87,7 +87,7 @@ async function calculate(userInfo, prompt) {
       responseMimeType: "text/plain",
     };
 
-    const userMemory = await getMathMemory(userInfo.user.id);
+    const userMemory = await getLogicMemory(userInfo.user.id);
     let conversationHistory = [];
     
     // Formatting user prompts
@@ -126,7 +126,7 @@ async function calculate(userInfo, prompt) {
     const answer = result.response?.text() || "I don't want to talk to you right now.";
 
     // Storing interaction (MongoDB)
-    await storeMathInteraction(userInfo.user.id, userInfo.user.username, userInfo.nickname, prompt, answer);
+    await storeLogicInteraction(userInfo.user.id, userInfo.user.username, userInfo.nickname, prompt, answer);
     return answer;
   } catch (error) {
     console.error(error);

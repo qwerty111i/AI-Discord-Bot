@@ -20,5 +20,5 @@ export async function fetchMessages(channel, numMessages) {
     } while (allMessages.length < numMessages && fetchedMessages.size > 0);
 
     // Returning the requested number of messages (if more was fetched)
-    return allMessages.slice(0, numMessages);
+    return allMessages.slice(1, numMessages);
 }
