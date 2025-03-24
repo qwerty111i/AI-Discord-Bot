@@ -2,6 +2,7 @@ import { SlashCommandBuilder } from 'discord.js';
 import { GoogleGenerativeAI, HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import dotenv from 'dotenv';
 import { splitMessage } from './helper/messagesplit.js';
+import { storeMathInteraction, getMathMemory } from '../database/memory.js';
 
 export const data = new SlashCommandBuilder()
     .setName('math')
@@ -18,7 +19,7 @@ export async function execute(interaction) {
     await interaction.reply({ content: 'You didn\'t give me anything to answer.', flags: MessageFlags.Ephemeral });
   } else {
     await interaction.deferReply();
-    let answer = await calculate(userQuestion);
+    let answer = await calculate(interaction.member, userQuestion);
 
     // Getting the user's display name
     let displayName = "";
@@ -68,7 +69,7 @@ export async function execute(interaction) {
   }
 }
 
-async function calculate(prompt) {
+async function calculate(userInfo, prompt) {
   try {
     dotenv.config({ path: "../.env" });
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -86,11 +87,34 @@ async function calculate(prompt) {
       maxOutputTokens: 8192,
       responseMimeType: "text/plain",
     };
+
+    const userMemory = await getMathMemory(userInfo.user.id);
+    let conversationHistory = [];
+    
+    // Formatting user prompts
+    if (userMemory.length > 0) {
+      conversationHistory = userMemory.map(interaction => ([
+        {
+          role: "user",
+          parts: [{ text: interaction.question }]
+        },
+        {
+          role: "model",
+          parts: [{ text: interaction.answer }]
+        }
+      ])).flat();
+    }
+    
+    // Add current prompt
+    conversationHistory.push({
+      role: "user",
+      parts: [{ text: prompt }]
+    });
   
     // Create a chat session
     const chatSession = model.startChat({
       generationConfig,
-      history: [],
+      history: conversationHistory,
       safetySettings: [
         { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
         { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE },
@@ -101,6 +125,9 @@ async function calculate(prompt) {
 
     const result = await chatSession.sendMessage(prompt);
     const answer = result.response?.text() || "I don't want to talk to you right now.";
+
+    // Storing interaction (MongoDB)
+    await storeMathInteraction(userInfo.user.id, userInfo.user.username, userInfo.nickname, prompt, answer);
     return answer;
   } catch (error) {
     console.error(error);
