@@ -16,6 +16,7 @@
   "author": "Shay DeWael",
   "license": "MIT",
   "dependencies": {
+    "@google/genai": "^0.8.0",
     "@google/generative-ai": "^0.22.0",
     "axios": "^1.8.1",
     "discord-interactions": "^4.0.0",
