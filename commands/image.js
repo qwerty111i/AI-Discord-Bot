@@ -23,7 +23,7 @@ export async function execute(interaction) {
   let image = await imageGenerate(userPrompt);
 
   if (image && Buffer.isBuffer(image)) {
-    await interaction.reply({
+    await interaction.followUp({
       files: [{
         attachment: image,
         name: 'generated-image.png'
@@ -37,7 +37,7 @@ export async function execute(interaction) {
 async function imageGenerate(prompt) {
   try {
     dotenv.config({ path: "../.env" });
-    const genAI = new GoogleGenAI(process.env.GEMINI_API_KEY);
+    const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     
 
     // Generate image with response modality set to IMAGE
@@ -45,12 +45,15 @@ async function imageGenerate(prompt) {
       model: "gemini-2.0-flash-exp-image-generation",
       contents: prompt,
       config: {
-        responseModalities: [Modality.IMAGE],
+        responseModalities: [Modality.TEXT,Modality.IMAGE],
       },
     });
     // Loop through the response parts to extract the inline image data
     for (const part of response.candidates[0].content.parts) {
-      if (part.inlineData) {
+      if (part.text) {
+        console.log(part.text);
+
+      } else if (part.inlineData) {
         const imageData = part.inlineData.data;
         const buffer = Buffer.from(imageData, "base64");
         return buffer;
