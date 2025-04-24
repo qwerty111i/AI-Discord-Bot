@@ -37,7 +37,7 @@ const rest = new REST({ version: '10' }).setToken(token);
     // Routes.applicationGuildCommands(clientId, guildId),
 
     await rest.put(
-      Routes.applicationCommands(clientId),
+      Routes.applicationGuildCommands(clientId, guildId),
       { body: commands }
     );
   } catch (error) {
