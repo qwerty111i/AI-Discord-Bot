@@ -11,7 +11,8 @@ ZeroShift is a Gemini powered discord bot that handles regular interactions with
 - **/ask:** Users can ask ZeroShift anything that they want!
 - **/recap:** Users can summarize a certain number of past messages that they may have missed for a quick recap.
 - **/math:** Users can understand how to solve complex math problems that may confuse simpletons.
-- **/summarize:**
+- **/genImg:** Users can generate images to make up for their lack of creativity.
+
 ![2025-04-2420-13-38-ezgif com-speed](https://github.com/user-attachments/assets/867453fd-7584-412e-813b-066985c4a567)
 
 
