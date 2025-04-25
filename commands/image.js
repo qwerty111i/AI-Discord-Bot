@@ -51,7 +51,7 @@ async function imageGenerate(prompt) {
     // Loop through the response parts to extract the inline image data
     for (const part of response.candidates[0].content.parts) {
       if (part.text) {
-        console.log(part.text);
+        ; // skipping over the text generation part
 
       } else if (part.inlineData) {
         const imageData = part.inlineData.data;
